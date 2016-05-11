@@ -1,0 +1,27 @@
+		LandisData		"Land type Attributes"
+
+
+
+
+
+>> minimum years for Species Shade Tolearnce 5 Establishment for each Ecoregions/landtype
+>>empty	 sw.slope	 ne.slope	 ridge	 updrain	 bottoms	 gentleslope
+	40		40		   40		  40		40			40			40	
+
+
+
+>>	GrowingSpaceOccupied(GSO)	ForEachEcoregion/landtype
+>>  --------------------       	------------------
+>>empty	 sw.slope	 ne.slope	 ridge	 updrain	 bottoms	 gentleslope
+	0		0.35	    0.35	  0.35	  0.35		   0.35		    0.35
+	0		0.55		0.55	  0.55	  0.55		   0.55		    0.55
+	0		0.65		0.65	  0.65	  0.65		   0.65		    0.65
+
+
+
+>> maximum GSO
+>> each line corresponds to one succession timestep
+
+>>		   empty	  sw.slope	  ne.slope	   ridge	   updrain	   bottoms	 gentleslope
+			0.0			0.8			0.74		0.74		0.896		0.896		0.896
+			

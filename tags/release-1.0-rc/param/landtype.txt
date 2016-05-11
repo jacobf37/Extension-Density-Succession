@@ -1,0 +1,13 @@
+LandisData  Ecoregions
+
+>>         Map
+>> Active  Code     Name     Description
+>> ------  ----  ----------  -----------
+      no     0   empty   		"empty"
+      yes    1   sw.slope   	"sw.slope"
+      yes    2   ne.slope   	"ne.slope"
+      yes    3   ridge   		"ridge"
+	  yes    4   updrain   		"updrain"
+      yes    5   bottoms   		"bottoms"
+	  yes    6   gentleslope    "gentleslope"	  
+	  
