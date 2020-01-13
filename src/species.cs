@@ -4,11 +4,15 @@ using System.Linq;
 using System.Text;
 //using System.Threading.Tasks;
 using System.IO;
-
+using Landis.Library.Cohorts;
+using Landis.Core;
+using System.Collections;
+using Landis.Library.AgeOnlyCohorts;
+using Landis.SpatialModeling;
 
 namespace Landis.Extension.Succession.Landispro
 {
-    public class species
+    public class species: Landis.Library.AgeOnlyCohorts.ISiteCohorts
     {
     	protected specie[] all_species;    //Array holding all species information.
 
@@ -34,7 +38,7 @@ namespace Landis.Extension.Succession.Landispro
 
 			all_species = new specie[n];
             for (int i = 0; i < n; i++ )
-                all_species[i] = new specie();
+                all_species[i] = new specie(i);
 
 			numSpec = n;
 
@@ -61,7 +65,7 @@ namespace Landis.Extension.Succession.Landispro
 
 				for (int i = 0; i < numSpec; i++)
 				{
-                    all_species[i] = new specie();
+                    all_species[i] = new specie(i);
 					all_species[i].AGELISTAllocateVector(i);
 				}
 
@@ -119,11 +123,30 @@ namespace Landis.Extension.Succession.Landispro
             }
         }
 
+        ISpeciesCohorts ISiteCohorts<ISpeciesCohorts>.this[ISpecies species]
+        {
+            get
+            {
+                return this[species];
+            }
+        }
 
-		//If all instances of class species are destructed then the reset function 
-		//may be called.  After it has been called instances may be constructed with
-		//a different number of species present.
-		public void reset()
+        public specie this[ISpecies species]
+        {
+            get
+            {
+                foreach (var i in all_species)
+                    if (i.Species.Name == species.Name)
+                        return i;
+                return null;
+            }
+        }
+
+
+        //If all instances of class species are destructed then the reset function 
+        //may be called.  After it has been called instances may be constructed with
+        //a different number of species present.
+        public void reset()
 		{
 			numSpec = 0;
 		}
@@ -316,13 +339,64 @@ namespace Landis.Extension.Succession.Landispro
 
             for (int i = 0; i < numSpec; i++)
             {
-                all_species[i] = new specie();
+                all_species[i] = new specie(i);
                 all_species[i].copy(in_all_species[i]);
             }
 
             currentSpec = 0;
         }
 
+        public bool IsMaturePresent(ISpecies species)
+        {
+            foreach (var i in all_species)
+                if (i.Species.Name == species.Name)
+                    return i.IsMaturePresent;
+            return false;
+        }
 
+        public IEnumerator<specie> GetEnumerator()
+        {
+            foreach (var i in all_species)
+                yield return i;
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        public void RemoveMarkedCohorts(ICohortDisturbance disturbance)
+        {
+            foreach(var i in all_species)
+                i.RemoveMarkedCohorts(disturbance);
+        }
+
+        public void RemoveMarkedCohorts(ISpeciesCohortsDisturbance disturbance)
+        {
+            foreach (var i in all_species)
+                i.RemoveMarkedCohorts(disturbance);
+        }
+
+        public void AddNewCohort(ISpecies species)
+        {
+            var pos = this[species];
+            if (pos != null)
+                pos.AddNewCohort();
+            else
+                throw new NotImplementedException();
+        }
+
+        public void Grow(ushort years, ActiveSite site, int? successionTimestep, ICore mCore)
+        {
+            foreach (var i in all_species)
+                for (int j = 0; j < years; ++j)
+                    i.GrowTree();
+        }
+
+        IEnumerator<ISpeciesCohorts> IEnumerable<ISpeciesCohorts>.GetEnumerator()
+        {
+            foreach (var i in all_species)
+                yield return i;
+        }
     }
 }

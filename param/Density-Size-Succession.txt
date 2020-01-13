@@ -28,3 +28,9 @@ SpeciesHeight												  0  << 0 means using default value
 OutPutOptionFile    						   OutputOption.txt
 OutPutDirectory     									      1
 FrequencyOutPutOptionFile 						   freq_out.put
+HarvestTimestep                                     10
+FireTimestep                                        10
+StockingX                                           -0.00507
+StockingY                                           0.01698
+StockingZ                                           0.00317
+

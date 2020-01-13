@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 //using System.Threading.Tasks;
 //using System.IO;
-
+using Landis.Library;
 using Edu.Wisc.Forest.Flel.Util;
 
 
@@ -217,7 +217,6 @@ namespace Landis.Extension.Succession.Landispro
                 else
 
                     land_Units[i].Status = landunit.land_status.ACTIVE;
-
                 land_Units[i].Index = i;
                 land_Units[i].LtID = i;
                 land_Units[i].MinShade = Land_type_Attributes.get_min_shade(i);
@@ -524,12 +523,9 @@ namespace Landis.Extension.Succession.Landispro
 
             int num_new_map_files = 0;
 
-            Console.WriteLine("FlagforSECFile = {0}", PlugIn.gl_param.FlagforSECFile);
-
             if(PlugIn.gl_param.FlagforSECFile == 3)
-            {
+            {                
                 ReadValue(int_val, currentLine);
-                //Console.WriteLine("int_val.Value.Actual = {0}", int_val.Value);
                 num_new_map_files = int_val.Value.Actual;
 
                 CheckNoDataAfter("num_new_map_files", currentLine);

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Edu.Wisc.Forest.Flel.Util;
+using Landis.Utilities;
 
 using System.Diagnostics;
 using System.IO;
@@ -67,13 +67,13 @@ namespace Landis.Extension.Succession.Landispro
         private int pro0or401=1;
         private int maxShadeTolerance;
 
-        private int[] flag_cut_GROUP_CUT      = new int[200];
-        private int[] flag_plant_GROUP_CUT    = new int[200];
-        private int[] num_TreePlant_GROUP_CUT = new int[200];
-
-        private int[] flag_cut_GROUP_CUT_copy      = new int[200];
-        private int[] flag_plant_GROUP_CUT_copy    = new int[200];
-        private int[] num_TreePlant_GROUP_CUT_copy = new int[200];
+        //Change bt YYF 2018/11
+        public int[] flag_cut_GROUP_CUT      = new int[200];
+        public int[] flag_plant_GROUP_CUT    = new int[200];
+        public int[] num_TreePlant_GROUP_CUT = new int[200];
+        public int[] flag_cut_GROUP_CUT_copy      = new int[200];
+        public int[] flag_plant_GROUP_CUT_copy    = new int[200];
+        public int[] num_TreePlant_GROUP_CUT_copy = new int[200];
 
 
         private int[] AgeDistStat_Year;
@@ -101,7 +101,11 @@ namespace Landis.Extension.Succession.Landispro
         public int MaxDistance { set { MaxDistofAllSpec = value; } }
         public uint SpecNum    { get { return specNum;   } }
         public int Pro0or401   { get { return pro0or401; } }
-
+        //Changed By YYF 2018.11
+        public int TimeStepHarvest ;
+        //Changed By YYF 2019.4
+        public int TimeStepFire;
+        
         public int CellSize 
         {              
             get { return cellSize;  }
@@ -218,9 +222,26 @@ namespace Landis.Extension.Succession.Landispro
             AgeDistStat_Year 		= null;
         }
 
+        /// <summary>
+        /// Add by YYF 2018/11
+        /// </summary>
+        public double[] BiomassHarvestCost;
+        public double[] CarbonHarvestCost;
+        public int Harvestflag;
 
+        public double stocking_x_value;
+        public double stocking_y_value;
+        public double stocking_z_value;
 
-
+        public void Harvest70outputdim()
+        {
+            BiomassHarvestCost = new double[rows * columns];
+            CarbonHarvestCost = new double[rows * columns];
+            Harvestflag = 1;
+            Array.Clear(BiomassHarvestCost, 0, (int)rows * (int)columns);
+            Array.Clear(CarbonHarvestCost, 0, (int)rows * (int)columns);
+        }
+        
 
         //This will dimension the size of the map to i rows and j columns, and it
         //will initialize the SPECIES class to species..
@@ -353,6 +374,98 @@ namespace Landis.Extension.Succession.Landispro
         //}
 
 
+        //add by YYF 2018/11
+        //There is a return at the begining
+        public void AftStChg(int i, int j)
+        //After Site Change
+        //This function does combination and delete of the seprated site made by BefStChg(int i, int j)
+        //insert this site to the sorted vector
+        {
+            return;
+            //SITE_insert(0, sitetouse, i, j);
+            //return;
+        }
+
+        public void BefStChg(int i, int j)
+        //Before Site Change
+        //This function back up a site and following changes are based on this seprated site
+        //sort vector is not touched here
+        {
+            return;
+            //SITE temp;
+            //temp = locateSitePt(i, j);
+            //*sitetouse = temp;
+            //if (temp.numofsites == 1)
+            //{
+            //    int pos;
+            //    int ifexist = 0;
+            //    SITE_LocateinSortIndex(sitetouse, pos, ifexist);
+            //    if (ifexist != 0)
+            //    {
+            //        List<SITE>.Enumerator temp_sitePtr;
+            //        temp_sitePtr = SortedIndex.begin();
+            //        SortedIndex.erase(temp_sitePtr + pos);
+            //        temp = null;
+            //    }
+            //    else
+            //    {
+            //        Console.Write("num of vectors {0:D}\n", SortedIndex.size());
+            //        Console.Write("ERROR ERROR ERROR ERROR!!~~~{0:D}\n", pos);
+            //        temp.dump();
+            //        SortedIndex.at(pos).dump();
+            //        SortedIndex.at(pos - 1).dump();
+            //        SortedIndex.at(pos - 2).dump();
+            //        SortedIndex.at(0).dump();
+            //        SortedIndex.at(1).dump();
+            //    }
+            //}
+            //else if (temp.numofsites <= 0)
+            //{
+            //    Console.Write("NO NO NO NO NO\n");
+            //}
+            //else
+            //{
+            //    temp.numofsites--;
+            //}
+            ////sitetouse->numofsites=1;
+            //fillinSitePt(i, j, sitetouse);
+            //return;
+        }
+
+        public void Harvest70outputIncreaseBiomassvalue(int i, int j, double value)
+        {
+            int x;
+#if BOUNDSCHECK  
+		if (i <= 0 || i> rows || j <= 0 || j> columns)  
+		{  
+			 string err = new string(new char[80]);   
+			 err = string.Format("SITES::operator() (int,int)-> ({0:D}, {1:D}) are illegal map					  coordinates", i, j);   
+			 throw new Expection(err);    
+		}   
+#endif
+
+            x = (i - 1) * (int)columns;
+            x = x + j - 1;
+            BiomassHarvestCost[x] += value; // Add by Qia Oct 07 2008
+        }
+
+        public void Harvest70outputIncreaseCarbonvalue(int i, int j, double value)
+        {
+            int x;
+#if BOUNDSCHECK 
+			if (i <= 0 || i> rows || j <= 0 || j> columns) 
+			{    
+				 string err = new string(new char[80]);   
+				 err = string.Format("SITES::operator() (int,int)-> ({0:D}, {1:D}) are illegal map						  coordinates", i, j);   
+				 throw new Expection(err);    
+			}
+#endif
+
+            x = (i - 1) * (int)columns;
+            x = x + j - 1;
+            CarbonHarvestCost[x] += value; // Add by Qia Oct 07 2008
+        }
+
         //sets the sites header info.
         //this might be a problem
         public void setHeader(uint[] dest)
@@ -464,9 +577,12 @@ namespace Landis.Extension.Succession.Landispro
         {
             //Console.WriteLine("map_landtype len = {0}, index = {1}", map_landtype.Length, (i - 1) * columns + j - 1);
             //return map_landtype[(i - 1) * columns + j - 1];
+
+            //landispro and landis2 look at the map in different ways. landispro looks at the map from the lower left 
+            //corner, while landis 2 does that from the upper left corner. therefore we need to make the following change:
             int landispro_i = (int)(rows - i + 1);
 
-            if (PlugIn.ModelCore.Landscape[landispro_i, (int)j].DataIndex == 0)            
+            if (PlugIn.ModelCore.Landscape[landispro_i, (int)j].DataIndex == 0)
                 return PlugIn.gl_landUnits["empty"];
             else
                 return PlugIn.gl_landUnits[PlugIn.ModelCore.Ecoregion[PlugIn.ModelCore.Landscape.GetSite(landispro_i, (int)j)].Name];
@@ -628,7 +744,7 @@ namespace Landis.Extension.Succession.Landispro
             if (0 == RDflag || 1 == RDflag || 2 == RDflag || 3 == RDflag)
             {
                 GetSeedNumberOnSite(Row, Col);
-
+                
                 SeedGermination(siteptr, l, RDflag);
                 
                 GetRDofSite(Row, Col);
@@ -1423,10 +1539,6 @@ namespace Landis.Extension.Succession.Landispro
                                 Debug.Assert(double_val <= int.MaxValue && double_val >= int.MinValue);
 
                                 Seedling[i - 1] = (long)double_val + temp;
-
-                                //Console.WriteLine("second {0:N6}, {1:N6}, {2}", seedlingTemp, l.probRepro(i), temp);
-                                //Console.WriteLine("second {0:N6}, {1:N6}, {2:N6}, {3:N6}", IndexRD[i - 1], (l.MaxRD - siteptr.RD) / RDTotal, Math.Pow((GetGrowthRates(i, 1, l.LtID) / 25.4), 1.605), local_speciesattr.MaxAreaOfSTDTree);
-                                //Console.WriteLine("second {0:N6}, {1:N6}, {2:N6}, {3:N6}", IndexRD[i - 1], l.MaxRD, siteptr.RD, RDTotal);
                             }
 
                         }
@@ -1519,9 +1631,9 @@ namespace Landis.Extension.Succession.Landispro
                                 seedlingTemp = IndexRD[i - 1] * (l.MaxRD - siteptr.RD) / RDTotal * cellsize_square / (Math.Pow((GetGrowthRates(i, 1, l.LtID) / 25.4), 1.605) * local_speciesattr.MaxAreaOfSTDTree);
 
                                 double double_val = seedlingTemp * l.probRepro(i);
-
+                                if (!(double_val <= int.MaxValue && double_val >= int.MinValue))
+                                    Console.WriteLine("{0} {1} {2} {3}", seedlingTemp, l.probRepro(i), RDTotal==0.0, RDTotal>0.0);
                                 Debug.Assert(double_val <= int.MaxValue && double_val >= int.MinValue);
-
                                 Seedling[i - 1] = (long)double_val + temp;
                             }
 
@@ -1569,7 +1681,7 @@ namespace Landis.Extension.Succession.Landispro
                 }
 
                 if (RDTotal >= 0.0)
-                {                    
+                {
                     if (RDTotal <= l.MaxRD - siteptr.RD)
                     {
                         for (int i = 1; i <= site_num; i++)
@@ -1604,10 +1716,9 @@ namespace Landis.Extension.Succession.Landispro
                             {
                                 temp = local_specie.TreesFromVeg * local_specie.VegPropagules;
 
-                                local_specie.TreesFromVeg = 0;                                
+                                local_specie.TreesFromVeg = 0;
 
                                 seedlingTemp = IndexRD[i - 1] * (l.MaxRD - siteptr.RD) / RDTotal * cellsize_square / (Math.Pow((GetGrowthRates(i, 1, l.LtID) / 25.4), 1.605) * local_speciesattr.MaxAreaOfSTDTree);
-                                
 
                                 double double_val = seedlingTemp * l.probRepro(i);
 
@@ -1707,7 +1818,6 @@ namespace Landis.Extension.Succession.Landispro
                         uint   tmp_term3 = local_specie.getTreeNum(j, i);
 
                         double tmp = tmp_term1 * tmp_term2 * tmp_term3 / cellsize_square;
-
                         siteptr.RD += (float)tmp;
 
                         if (tmp_term3 > 0)
@@ -1719,6 +1829,7 @@ namespace Landis.Extension.Succession.Landispro
                         }
 
                     }
+
                 }//end if
  
             }//end for
@@ -1779,7 +1890,9 @@ namespace Landis.Extension.Succession.Landispro
                         uint treenum = 0;
 
                         for (int m = m_begin; m <= m_limit; m++)
+                        {
                             treenum += local_specie.getTreeNum(m, k);
+                        }
 
                         local_specie.MatureTree = treenum;
                     }
@@ -1841,7 +1954,7 @@ namespace Landis.Extension.Succession.Landispro
                                 Debug.Assert(double_val <= UINT_MAX && double_val > 0);
 
                                 local_specie.AvailableSeed += (uint)double_val;
-
+                                if(Row==20&&Col==2)Console.WriteLine("{0}:+{1}={2}", i_age, double_val, local_specie.AvailableSeed);
                             }
 
                         }
@@ -1874,6 +1987,7 @@ namespace Landis.Extension.Succession.Landispro
                                     Debug.Assert(double_val <= UINT_MAX && double_val >= 0);
 
                                     local_specie.AvailableSeed += (uint)double_val;
+                                    if (Row == 20 && Col == 2) Console.WriteLine("{0} {1}:+{2}={3}", i, j, double_val, local_specie.AvailableSeed);
                                 }
 
                             }
@@ -1896,6 +2010,7 @@ namespace Landis.Extension.Succession.Landispro
                         Debug.Assert(double_val <= UINT_MAX && double_val >= 0);
 
                         local_specie.AvailableSeed = (uint)double_val;
+                        if (Row == 20 && Col == 2) Console.WriteLine("frand: {0}", double_val);
                     }
 
                 }//end else
@@ -1932,283 +2047,6 @@ namespace Landis.Extension.Succession.Landispro
 
 
 
-
-
-        public void orig_NaturalMortality(site siteptr, uint Row, uint Col, int StartAge)
-        {
-            landunit l = locateLanduPt(Row, Col);
-
-            int cellsize_square = cellSize * cellSize;
-            
-            double DQ_const = 3.1415926 / (4 * 0.0002471 * cellsize_square * 30.48 * 30.48);
-
-            uint site_species_num = siteptr.Num_Species; //number of species
-
-
-            //kill all tree, else kill youngest tree
-            if (StartAge == 0)
-            {
-                //Console.WriteLine("MortalityFlag = {0}", MortalityFlag);
-
-                if (MortalityFlag == 0)
-                {
-                    double d_tmpDQ = 0;
-
-                    for (int i = 1; i <= site_species_num; i++)
-                    {
-                        int site_spec_i_type = siteptr.specAtt(i).SpType;
-                        int max_count = siteptr.specAtt(i).Longevity / timeStep;
-
-                        if (site_spec_i_type >= 0)
-                        {
-                            specie local_specie = siteptr.SpecieIndex(i);
-
-                            for (int j = 1; j <= max_count; j++)
-                            {
-                                float growthrate = GetGrowthRates(i, j, l.LtID);
-
-                                uint spec_ij_treenum = local_specie.getTreeNum(j, i);
-
-                                //Wenjuan Suggested on Nov 16 2010
-                                d_tmpDQ += growthrate * growthrate * DQ_const * spec_ij_treenum;
-
-                                if (spec_ij_treenum != 0)
-                                    Console.Write("{0}, {1:N2} ", spec_ij_treenum, growthrate);
-                            }
-                        }
-                    }
-
-                    Console.WriteLine("\n{0:N6}", d_tmpDQ);
-                    Console.ReadLine();
-
-                    float tmpDQ = (float)d_tmpDQ;
-
-
-                    for (int i = 1; i <= site_species_num; i++)
-                    {
-                        int site_spec_i_type = siteptr.specAtt(i).SpType;
-                        int max_count = siteptr.specAtt(i).Longevity / timeStep;
-
-                        specie local_specie = siteptr.SpecieIndex(i);
-
-                        if (site_spec_i_type >= 0)
-                        {
-                            for (int j = 1; j <= max_count; j++)
-                            {
-                                float growthrate = GetGrowthRates(i, j, l.LtID);
-                                uint spec_ij_treenum = local_specie.getTreeNum(j, i);
-
-                                float TmpMortality = (float)(timeStep / 10 / (1.0 + Math.Exp(3.25309 - 0.00072647 * tmpDQ + 0.01668809 * growthrate / 2.54)));
-                                TmpMortality = (1.0f < TmpMortality ? 1.0f : TmpMortality);
-                                
-                                float DeadTree = spec_ij_treenum * TmpMortality;
-
-                                Debug.Assert(DeadTree <= UINT_MAX && DeadTree >= 0);
-
-                                uint DeadTreeInt = (uint)DeadTree;
-
-                                if (DeadTree - DeadTreeInt >= 0.0001)                                
-                                {
-                                    float rand = system1.frand1();
-
-                                    if (rand < 0.1)
-                                        DeadTreeInt++;
-                                }
-
-                                local_specie.setTreeNum(j, i, (int)Math.Max(0, spec_ij_treenum - DeadTreeInt));
-
-                                tmpDQ -= (float)(growthrate * growthrate * DQ_const * DeadTree);
-                            }
-
-                        }
-                        else
-                        {
-                            for (int j = 1; j <= max_count; j++)
-                                local_specie.setTreeNum(j, i, cellsize_square);
-                        }
-
-                    }
-
-                }
-                else
-                {
-
-                    for (int i = 1; i <= site_species_num; i++)
-                    {
-                        int site_spec_i_type = siteptr.specAtt(i).SpType;
-                        int max_count = siteptr.specAtt(i).Longevity / timeStep;
-
-                        specie local_specie = siteptr.SpecieIndex(i);
-
-                        if (site_spec_i_type >= 0)
-                        {
-                            for (int j = 1; j <= max_count; j++)
-                            {
-                                uint spec_ij_treenum = local_specie.getTreeNum(j, i);
-                                
-                                float DeadTree = spec_ij_treenum * GetMortalityRates(i, j, l.LtID);
-
-                                Debug.Assert(DeadTree <= UINT_MAX && DeadTree >= 0);
-
-                                uint DeadTreeInt = (uint)DeadTree;
-
-                                if (DeadTree - DeadTreeInt >= 0.0001)                                
-                                {
-                                    float rand = system1.frand1();
-                                    
-                                    if (rand < 0.1)
-                                        DeadTreeInt++;
-                                }
-
-
-                                local_specie.setTreeNum(j, i, (int)Math.Max(0, spec_ij_treenum - DeadTreeInt));
-                            }
-
-                        }
-                        else
-                        {
-                            for (int j = 1; j <= max_count; j++)
-                                local_specie.setTreeNum(j, i, cellsize_square);
-                        }
-
-                    }
-
-                }
-
-            }
-            else //kill youngest tree
-            {
-                if (MortalityFlag == 0)
-                {
-                    double d_tmpDQ = 0;
-
-                    for (int i = 1; i <= site_species_num; i++)
-                    {
-                        int site_spec_i_type = siteptr.specAtt(i).SpType;
-                        int max_count = siteptr.specAtt(i).Longevity / timeStep;
-
-                        if (site_spec_i_type >= 0)
-                        {
-                            specie local_specie = siteptr.SpecieIndex(i);
-
-                            for (int j = 1; j <= max_count; j++)
-                            {
-                                float growthrate = GetGrowthRates(i, j, l.LtID);
-
-                                uint spec_ij_treenum = local_specie.getTreeNum(j, i);
-
-                                //Wenjuan Suggested on Nov 16 2010
-                                d_tmpDQ += growthrate * growthrate * DQ_const * spec_ij_treenum;
-                            }
-                        }
-                    }
-
-                    float tmpDQ = (float)d_tmpDQ;
-
-                    
-                    for (int i = 1; i <= site_species_num; i++)
-                    {
-                        int site_spec_i_type = siteptr.specAtt(i).SpType;
-                        int max_count = siteptr.specAtt(i).Longevity / timeStep;
-
-                        specie local_specie = siteptr.SpecieIndex(i);
-
-                        if (site_spec_i_type >= 0)
-                        {
-                            for (int j = 1; j <= StartAge; j++)
-                            {
-                                float growthrate = GetGrowthRates(i, j, l.LtID);
-
-                                float TmpMortality = (float)(timeStep / 10 / (1.0 + Math.Exp(3.25309 - 0.00072647 * tmpDQ + 0.01668809 * growthrate / 2.54)));
-                                TmpMortality = (1.0f < TmpMortality ? 1.0f : TmpMortality);
-
-                                uint spec_ij_treenum = local_specie.getTreeNum(j, i);
-                                
-                                float DeadTree = spec_ij_treenum * TmpMortality;
-                                
-                                Debug.Assert(DeadTree <= UINT_MAX && DeadTree >= 0);
-
-                                uint DeadTreeInt = (uint)DeadTree;
-
-                                if (DeadTree - DeadTreeInt >= 0.0001)                                
-                                {
-                                    float rand = system1.frand1();
-                                    
-                                    if (rand < 0.1)
-                                        DeadTreeInt++;
-                                }
-
-                                local_specie.setTreeNum(j, i, (int)Math.Max(0, spec_ij_treenum - DeadTreeInt));
-
-                                tmpDQ -= (float)(growthrate * growthrate * DQ_const * DeadTree);
-                            }
-        
-                        }
-                        else
-                        {
-                            for (int j = 1; j <= StartAge; j++)
-                                local_specie.setTreeNum(j, i, cellsize_square);
-                        }
-
-                    }
-                    
-
-                }
-                else
-                {
-
-                    for (int i = 1; i <= site_species_num; i++)
-                    {
-                        int site_spec_i_type = siteptr.specAtt(i).SpType;
-                        int max_count = siteptr.specAtt(i).Longevity / timeStep;
-
-                        specie local_specie = siteptr.SpecieIndex(i);
-
-                        if (site_spec_i_type >= 0)
-                        {
-                            for (int j = 1; j <= StartAge; j++)
-                            {
-                                uint spec_ij_treenum = local_specie.getTreeNum(j, i);
-                                
-                                float DeadTree = spec_ij_treenum * GetMortalityRates(i, j, l.LtID);
-                                
-                                Debug.Assert(DeadTree <= UINT_MAX && DeadTree >= 0);
-
-                                uint DeadTreeInt = (uint)DeadTree;
-
-                                if (DeadTree - DeadTreeInt >= 0.0001)                                
-                                {                                    
-                                    float rand = system1.frand1();
-                                    
-                                    if (rand < 0.1)
-                                        DeadTreeInt++;
-                                }
-
-                                local_specie.setTreeNum(j, i, (int)Math.Max(0, spec_ij_treenum - DeadTreeInt));
-
-                            }
-
-                        }
-                        else
-                        {
-                            for (int j = 1; j <= StartAge; j++)
-                                local_specie.setTreeNum(j, i, cellsize_square);
-                        }
-
-                    }
-
-                }
-
-            }
-
-        }
-
-
-
-
-
-
-        //double version
         public void NaturalMortality(site siteptr, uint Row, uint Col, int StartAge)
         {
             landunit l = locateLanduPt(Row, Col);
@@ -2253,8 +2091,7 @@ namespace Landis.Extension.Succession.Landispro
                         }
                     }
 
-                    //Console.Write("{0:N2} ", tmpDQ);
-                    //Console.WriteLine("{0:N2} {1} {2}", tmpDQ, Row, Col);
+                    //Console.Write("{0:N2} ", d_tmpDQ);
                     //Console.ReadLine();                    
 
 
@@ -2476,7 +2313,7 @@ namespace Landis.Extension.Succession.Landispro
                 }
 
             }
-            
+
         }
 
 
@@ -2666,9 +2503,7 @@ namespace Landis.Extension.Succession.Landispro
 
             Debug.Assert(spec >= 1 && spec <= specNum);
             Debug.Assert(spec * year < specNum * local_const);
-
-            //if (spec == 18 && year == 4)
-            //    Console.WriteLine("here: {0:N2}", GrowthRates_file[landtype_index][index]);
+            
             
             if (GrowthRates_file.Count == 0)
                 return GrowthRates[index];
@@ -3237,7 +3072,7 @@ namespace Landis.Extension.Succession.Landispro
                 if (AtEndOfInput)
                     throw NewParseException("Expected a line here");
 
-                Edu.Wisc.Forest.Flel.Util.StringReader currentLine = new Edu.Wisc.Forest.Flel.Util.StringReader(CurrentLine);
+                Landis.Utilities.StringReader currentLine = new Landis.Utilities.StringReader(CurrentLine);
 
                 ReadValue(float_val, currentLine);
 
@@ -3291,7 +3126,7 @@ namespace Landis.Extension.Succession.Landispro
             site sitetmp = PlugIn.gl_sites[1, 1];
             int timeStep = PlugIn.gl_param.SuccessionTimestep;
 
-            Edu.Wisc.Forest.Flel.Util.StringReader currentLine = new Edu.Wisc.Forest.Flel.Util.StringReader(CurrentLine);
+            Landis.Utilities.StringReader currentLine = new Landis.Utilities.StringReader(CurrentLine);
 
             uint species_num = PlugIn.gl_sites.SpecNum;
             while (!AtEndOfInput)
@@ -3308,7 +3143,7 @@ namespace Landis.Extension.Succession.Landispro
                                  currentLine);
 
                     GetNextLine();
-                    currentLine = new Edu.Wisc.Forest.Flel.Util.StringReader(CurrentLine);
+                    currentLine = new Landis.Utilities.StringReader(CurrentLine);
                 }
 
                 numLU++;
@@ -3354,7 +3189,7 @@ namespace Landis.Extension.Succession.Landispro
 
             uint specNum = PlugIn.gl_sites.SpecNum;
 
-            Edu.Wisc.Forest.Flel.Util.StringReader currentLine = new Edu.Wisc.Forest.Flel.Util.StringReader(CurrentLine);
+            Landis.Utilities.StringReader currentLine = new Landis.Utilities.StringReader(CurrentLine);
 
 
 
@@ -3443,7 +3278,7 @@ namespace Landis.Extension.Succession.Landispro
                 CheckNoDataAfter(temp + " column", currentLine);
 
                 GetNextLine();
-                currentLine = new Edu.Wisc.Forest.Flel.Util.StringReader(CurrentLine);
+                currentLine = new Landis.Utilities.StringReader(CurrentLine);
             }
 
 
@@ -3515,14 +3350,14 @@ namespace Landis.Extension.Succession.Landispro
 
             CheckNoDataAfter(temp + " column", currentLine);
             GetNextLine();
-            currentLine = new Edu.Wisc.Forest.Flel.Util.StringReader(CurrentLine);
+            currentLine = new Landis.Utilities.StringReader(CurrentLine);
             /////////////////////
 
             ReadValue(temp, currentLine);
             
             CheckNoDataAfter(temp + " column", currentLine);
             GetNextLine();
-            currentLine = new Edu.Wisc.Forest.Flel.Util.StringReader(CurrentLine);
+            currentLine = new Landis.Utilities.StringReader(CurrentLine);
             if (temp.Value.Actual == "Y")
             {
                 PlugIn.gl_sites.FlagAgeRangeOutput = 1;
@@ -3590,7 +3425,7 @@ namespace Landis.Extension.Succession.Landispro
 
                 CheckNoDataAfter(temp + " column", currentLine);
                 GetNextLine();
-                currentLine = new Edu.Wisc.Forest.Flel.Util.StringReader(CurrentLine);
+                currentLine = new Landis.Utilities.StringReader(CurrentLine);
             }
 
             ///////below is for age range total//////////
@@ -3656,7 +3491,7 @@ namespace Landis.Extension.Succession.Landispro
             }
             CheckNoDataAfter(temp + " column", currentLine);
             GetNextLine();
-            currentLine = new Edu.Wisc.Forest.Flel.Util.StringReader(CurrentLine);
+            currentLine = new Landis.Utilities.StringReader(CurrentLine);
             ////////////////////////
 
             for (int i = 0; i < specNum; i++)
@@ -3689,7 +3524,7 @@ namespace Landis.Extension.Succession.Landispro
 
                 CheckNoDataAfter(temp + " column", currentLine);
                 GetNextLine();
-                currentLine = new Edu.Wisc.Forest.Flel.Util.StringReader(CurrentLine);
+                currentLine = new Landis.Utilities.StringReader(CurrentLine);
             }
 
 
@@ -3739,7 +3574,7 @@ namespace Landis.Extension.Succession.Landispro
 
             PlugIn.gl_sites.Flag_AgeDistStat = 1;
             
-            Edu.Wisc.Forest.Flel.Util.StringReader currentLine = new Edu.Wisc.Forest.Flel.Util.StringReader(CurrentLine);
+            Landis.Utilities.StringReader currentLine = new Landis.Utilities.StringReader(CurrentLine);
 
             for (int i = 0; i < specNum; i++)
             {

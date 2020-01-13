@@ -20,7 +20,6 @@ namespace Landis.Extension.Succession.Landispro
     {
         public static readonly string ExtensionName = "Landis_pro Succession";
 
-        private static pdp pPDP = new pdp();
 
         private static ICore modelCore;
 
@@ -29,17 +28,23 @@ namespace Landis.Extension.Succession.Landispro
         //private static map16 gl_visitMap = new map16();
         private static string[] ageMaps = new string[defines.MAX_RECLASS];
 
-        private string fpforTimeBU_name = null;
+        
         private string fpLogFileSEC_name = null;
 
         private static List<string> SEC_landtypefiles = new List<string>();
         private static List<string> SEC_gisfiles = new List<string>();
 
-        private static int[] freq = new int[6];
-        private static double[] wAdfGeoTransform = new double[6];
+        //change by YYF 2018/11
+        public static int[] freq = new int[6];
+        public static uint numSpecies;
+        public static uint snr, snc;
+        public static pdp pPDP = new pdp();
+        public static string fpforTimeBU_name = null;
+        public static double[] wAdfGeoTransform = new double[6];
 
-        private static uint numSpecies;
-        private static uint snr, snc;
+        //change by YYF 2019/4
+        public static int envOn;
+
         private static uint specAtNum;
 
         private static int numbOfIter;
@@ -79,6 +84,7 @@ namespace Landis.Extension.Succession.Landispro
             modelCore = mCore;
             //Console.WriteLine("Run: From {0} to {1}, current {2}", modelCore.StartTime, modelCore.EndTime, modelCore.CurrentTime);
             //Console.WriteLine("\n\nhere datefile = {0}\n\n", dataFile);
+           
             InputParametersParser parser = new InputParametersParser();
             gl_param = Landis.Data.Load<InputParameters>(dataFile, parser);
             //Init_Output.GDLLMode = gl_param.read(dataFile);
@@ -94,6 +100,8 @@ namespace Landis.Extension.Succession.Landispro
             BiomassParamParser bioparser = new BiomassParamParser();
             Landis.Data.Load<BiomassParam>(PlugIn.gl_param.Biomassfile, bioparser);
 
+            numSpecies = gl_spe_Attrs.NumAttrs;
+
 
             species.attach(PlugIn.gl_spe_Attrs);
             gl_landUnits.attach(PlugIn.gl_spe_Attrs);
@@ -103,6 +111,7 @@ namespace Landis.Extension.Succession.Landispro
             Establishment_probability_AttributesParser parser3 = new Establishment_probability_AttributesParser();
             //var establish =
             Landis.Data.Load<Establishment_probability_Attributes>(gl_param.VarianceSECFile, parser3);
+
         }
 
 
@@ -113,10 +122,11 @@ namespace Landis.Extension.Succession.Landispro
             Console.WriteLine("Start Landis Pro at {0}", now);
 
             Timestep = gl_param.SuccessionTimestep;
-            gl_sites.SuccessionTimeStep = gl_param.SuccessionTimestep;            
-            
-            
-            int envOn = 0;
+            gl_sites.SuccessionTimeStep = gl_param.SuccessionTimestep;
+            In_Output.Init_IO();
+
+
+            envOn = 0;
             int reclYear = 0;
 
 
@@ -139,7 +149,7 @@ namespace Landis.Extension.Succession.Landispro
                 gl_sites.TimeStep_BDA     = gl_param.Timestep_BDA;
                 gl_sites.TimeStep_Fire    = gl_param.Timestep_Fire;
                 gl_sites.TimeStep_Fuel    = gl_param.Timestep_Fuel;
-                gl_sites.TimeStep_Harvest = gl_param.Timestep_Harvest;
+                gl_sites.TimeStep_Harvest = gl_param.Timestep_Harvest;  //Harvest Module
                 gl_sites.TimeStep_Wind    = gl_param.Timestep_Wind;
 #endif
 
@@ -148,7 +158,7 @@ namespace Landis.Extension.Succession.Landispro
                 freq[x] = 1;
 
 #if !LANDISPRO_ONLY_SUCCESSION
-            if ((Init_Output.GDLLMode & defines.G_HARVEST) != 0)
+            if ((Init_Output.GDLLMode & defines.G_HARVEST) != 0)    //Harvest Module
                 freq[5] = 1;
 
             if ((Init_Output.GDLLMode & defines.G_BDA) != 0)
@@ -174,8 +184,17 @@ namespace Landis.Extension.Succession.Landispro
 #endif
 
             //In_Output.getInput(freq, ageMaps, pPDP, BDANo, wAdfGeoTransform);
-            In_Output.getInput(freq, ageMaps, pPDP, wAdfGeoTransform);
+            SiteVars.Initialize();
+            In_Output.getInput(freq, ageMaps, pPDP);
 
+#if !LANDISPRO_ONLY_SUCCESSION
+            if ((gDLLMode & DEFINES.G_HARVEST) != 0)
+            {
+                Console.WriteLine("Harvest Dll loaded in...");
+                GlobalFunctions.HarvestPass(sites, speciesAttrs);
+                sites.Harvest70outputdim();
+            }
+#endif
 
             Console.Write("Finish getting input\n");
 
@@ -254,7 +273,6 @@ namespace Landis.Extension.Succession.Landispro
 
             Console.Write("it took {0} seconds\n", ltimeDiff);
             gl_landUnits.initiateVariableVector(gl_param.Num_Iteration, gl_param.SuccessionTimestep, specAtNum, gl_param.FlagforSECFile);
-
             using (StreamWriter fpforTimeBU = new StreamWriter(fpforTimeBU_name))
             {
                 fpforTimeBU.Write("Initilization took: {0} seconds\n", ltimeDiff);
@@ -269,10 +287,9 @@ namespace Landis.Extension.Succession.Landispro
 
 
 
-        public static void succession_Landis70(pdp ppdp)
+        public static void succession_Landis70(pdp ppdp,int itr)
         {
             gl_sites.GetMatureTree();
-
 
             //increase ages
             for (uint i = 1; i <= snr; ++i)
@@ -299,10 +316,8 @@ namespace Landis.Extension.Succession.Landispro
                 //Console.ReadLine();
             }
 
-            
             //seed dispersal
             initiateRDofSite_Landis70();
-            
             Console.WriteLine("Seed Dispersal:");
 
 
@@ -311,15 +326,15 @@ namespace Landis.Extension.Succession.Landispro
                 //Console.WriteLine("\n{0}%\n", 100 * i / snr);
 
                 for (uint j = 1; j <= snc; ++j)
-                {                    
+                {
+                    //Console.WriteLine("i = {0}, j = {1}", i, j);
                     landunit l = gl_sites.locateLanduPt(i, j);
 
                     KillTrees(i, j);
-
+                    if (itr == 90 && i == 193 && j == 156)
+                        Console.WriteLine("watch: {0}:{1}", "kill trees", gl_sites[193, 156].SpecieIndex(2).getAgeVector(1));
                     if (l != null && l.active())
                     {
-                        //Console.WriteLine("i = {0}, j = {1}, {2:N1}", i, j, gl_sites[i, j].RD);
-
                         float local_RD = gl_sites[i, j].RD;
 
                         if (local_RD < l.MaxRDArray(0))
@@ -344,11 +359,9 @@ namespace Landis.Extension.Succession.Landispro
                             gl_sites.SiteDynamics(4, i, j);
                         }
                     }
-                    
                 }
-                //Console.ReadLine();
+
             }
-            
             Console.WriteLine("end succession_Landis70 once");
         }
 
@@ -403,7 +416,6 @@ namespace Landis.Extension.Succession.Landispro
                             if (system1.frand() < local_threshold)
                                 tmpMortality++;
                         }
-
                         local_specie.setTreeNum(m, k, Math.Max(0, tmpTreeNum - tmpMortality));
                     }
 
@@ -445,9 +457,9 @@ namespace Landis.Extension.Succession.Landispro
                     system1.fseed(gl_param.RandSeed + itr / gl_sites.SuccessionTimeStep * 6);
 
                     gl_landUnits.ReprodUpdate(itr / gl_sites.SuccessionTimeStep);
-
-                    succession_Landis70(ppdp);
-
+                    //Console.WriteLine("random number: {0}", system1.frand());
+                    succession_Landis70(ppdp,itr);
+                    //Console.WriteLine("random number: {0}", system1.frand());
                     ltimeTemp = DateTime.Now;
 
                     ltimeDiff = ltimeTemp - ltime;
@@ -554,11 +566,12 @@ namespace Landis.Extension.Succession.Landispro
                 gl_landUnits[r].MaxRDArrayItem = rd;
                 gl_landUnits[r].MaxRD = rd[3];
             }
+
             //Simulation loops////////////////////////////////////////////////
 
             //for (int i = 1; i <= numbOfIter * gl_sites.TimeStep; i++)
             //{
-            
+
 
             if (i % gl_sites.SuccessionTimeStep == 0)
             {
@@ -736,7 +749,6 @@ namespace Landis.Extension.Succession.Landispro
 
 
             singularLandisIteration(i, pPDP);
-
 
 
             if (i % gl_sites.SuccessionTimeStep == 0 || i == numbOfIter * gl_sites.SuccessionTimeStep)

@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using Landis;
-using Edu.Wisc.Forest.Flel.Util;
+using Landis.Utilities;
+using Landis.Core;
 
 
 namespace Landis.Extension.Succession.Landispro
@@ -143,19 +139,20 @@ namespace Landis.Extension.Succession.Landispro
     /// </summary>
     public class speciesattr : extra_species_attr
     {
-        private string name;           //Species Name.
-
-        private int longevity;      //Maximum age.
-        private int maturity;       //Sexual Maturity.
-        private int shadeTolerance; //Shade Tolerance.
-        private int fireTolerance;  //Fire Tolerance.
-        private int effectiveD;     //Effective seeding distance.
-        private int maxD;           //Maximum seeding distance. 
+        private ISpecies spe;
+        //private string name;           //Species Name.
         
-        private float vegProb;        //Probability of vegetative seeding.
+        //private int longevity;      //Maximum age.
+        //private int maturity;       //Sexual Maturity.
+        //private int shadeTolerance; //Shade Tolerance.
+        //private int fireTolerance;  //Fire Tolerance.
+        //private int effectiveD;     //Effective seeding distance.
+        //private int maxD;           //Maximum seeding distance. 
+        
+        //private float vegProb;        //Probability of vegetative seeding.
 
-        private int MinSproutAge;   //Minimum sprouting age
-        private int MaxSproutAge;   //Maximum sprouting age
+        //private int MinSproutAge;   //Minimum sprouting age
+        //private int MaxSproutAge;   //Maximum sprouting age
 
         //================================================================
         private float maxAreaOfSTDTree;
@@ -164,27 +161,27 @@ namespace Landis.Extension.Succession.Landispro
 
         public string Name 
         { 
-            get { return name; } 
+            get { return spe.Name; } 
         }
 
         public int Longevity 
         { 
-            get { return longevity; } 
+            get { return spe.Longevity; } 
         }
 
         public int Maturity  
         { 
-            get { return maturity;  } 
+            get { return spe.Maturity;  } 
         }
 
         public int Shade_Tolerance 
         { 
-            get { return shadeTolerance; } 
+            get { return spe.ShadeTolerance; } 
         }
 
         public int Max_seeding_Dis 
         { 
-            get { return maxD; } 
+            get { return spe.MaxSeedDist; } 
         }
 
         public float MaxAreaOfSTDTree
@@ -193,19 +190,33 @@ namespace Landis.Extension.Succession.Landispro
             set { maxAreaOfSTDTree = value; }
         }
 
+        //Add by YYF 2018/11
+        public int MaxSproutAge
+        {
+            get { return spe.MaxSproutAge; }
+        }
+
+        public int MinSproutAge
+        {
+            get { return spe.MinSproutAge; }
+        }
+
+        //Add by YYF 2019/4
+        public int FireTolerance
+        {
+            get { return spe.FireTolerance; }
+        }
+
+        public float VegReprodProb
+        {
+            get { return spe.VegReprodProb; }
+        }
+        //========
 
         //Constructor
         public speciesattr()        
         {
-            name 		   = null;
-            longevity      = 0;
-            maturity       = 0;
-            shadeTolerance = 0;
-            fireTolerance  = 0;
-            effectiveD     = 0;
-            maxD           = 0;
-            MaxSproutAge   = 0;
-            vegProb        = 0.0f;
+            spe = null;
             ReclassCoef    = 0.0f;
         }
 
@@ -214,18 +225,9 @@ namespace Landis.Extension.Succession.Landispro
         //get species attributes
         public void read(extra_species_attr extra_attr, Core.ISpecies spe)
         {
-            name           = spe.Name;
-            longevity      = spe.Longevity;
-            maturity       = spe.Maturity;
-            shadeTolerance = spe.ShadeTolerance;
-            fireTolerance  = spe.FireTolerance;
-            effectiveD     = spe.EffectiveSeedDist;
-            maxD           = spe.MaxSeedDist;
-            vegProb        = spe.VegReprodProb;
-            MinSproutAge   = spe.MinSproutAge;
-            MaxSproutAge   = spe.MaxSproutAge;
+            this.spe = spe;
 
-            if (extra_attr.SpeciesName != name)
+            if (extra_attr.SpeciesName != Name)
                 throw new System.Exception("name is not consistent. This is speciesattr.cs");
 
             ReclassCoef = extra_attr.ReclassCoef;
@@ -244,15 +246,15 @@ namespace Landis.Extension.Succession.Landispro
 
         public void write(System.IO.StreamWriter outfile)    //Write species attributes to a file.
         {
-            outfile.Write("{0}\t", name);
-            outfile.Write("{0}\t", longevity);
-            outfile.Write("{0}\t", maturity);
-            outfile.Write("{0}\t", shadeTolerance);
-            outfile.Write("{0}\t", fireTolerance);
-            outfile.Write("{0}\t", effectiveD);
-            outfile.Write("{0}\t", maxD);
-            outfile.Write("{0}\t", vegProb);
-            outfile.Write("{0}\t", MaxSproutAge);
+            outfile.Write("{0}\t", Name);
+            outfile.Write("{0}\t", Longevity);
+            outfile.Write("{0}\t", Maturity);
+            outfile.Write("{0}\t", Shade_Tolerance);
+            outfile.Write("{0}\t", spe.FireTolerance);
+            outfile.Write("{0}\t", spe.EffectiveSeedDist);
+            outfile.Write("{0}\t", spe.MaxSeedDist);
+            outfile.Write("{0}\t", spe.VegReprodProb);
+            outfile.Write("{0}\t", spe.MaxSproutAge);
             outfile.Write("{0}\n", ReclassCoef);
         }
 
@@ -262,15 +264,15 @@ namespace Landis.Extension.Succession.Landispro
         //Dump species attributes to the CRT.
         public void dump()
         {
-            Console.WriteLine("name:           {0}", name);
-            Console.WriteLine("longevity:      {0}", longevity);
-            Console.WriteLine("maturity:       {0}", maturity);
-            Console.WriteLine("shadeTolerance: {0}", shadeTolerance);
-            Console.WriteLine("fireTolerance:  {0}", fireTolerance);
-            Console.WriteLine("effectiveD:     {0}", effectiveD);
-            Console.WriteLine("maxD:           {0}", maxD);
-            Console.WriteLine("vegProb:        {0}", vegProb);
-            Console.WriteLine("maxSproutAge:   {0}", MaxSproutAge);
+            Console.WriteLine("name:           {0}", Name);
+            Console.WriteLine("longevity:      {0}", Longevity);
+            Console.WriteLine("maturity:       {0}", Maturity);
+            Console.WriteLine("shadeTolerance: {0}", Shade_Tolerance);
+            Console.WriteLine("fireTolerance:  {0}", spe.FireTolerance);
+            Console.WriteLine("effectiveD:     {0}", spe.EffectiveSeedDist);
+            Console.WriteLine("maxD:           {0}", spe.MaxSeedDist);
+            Console.WriteLine("vegProb:        {0}", spe.VegReprodProb);
+            Console.WriteLine("maxSproutAge:   {0}", spe.MaxSproutAge);
             Console.WriteLine("reclassCoef:    {0}", ReclassCoef);
         }
 
@@ -283,8 +285,8 @@ namespace Landis.Extension.Succession.Landispro
             float a = .95f;
             float b = 0.001f;
 
-            double md = maxD;
-            double ed = effectiveD;
+            double md = spe.MaxSeedDist;
+            double ed = spe.EffectiveSeedDist;
 
 
             if (distance <= ed)

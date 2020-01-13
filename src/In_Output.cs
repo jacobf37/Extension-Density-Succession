@@ -9,7 +9,7 @@ using System.Text;
 using System.IO;
 using OSGeo.GDAL;
 using OSGeo.OSR;
-using Edu.Wisc.Forest.Flel.Util;
+using Landis.Utilities;
 
 //this file corresponds to IO.cpp in landis pro framewrok
 
@@ -20,43 +20,38 @@ namespace Landis.Extension.Succession.Landispro
     {
         private static int gDLLMode;
         private static string[] reMethods = new string[defines.MAX_RECLASS];
-
-        private static uint snr;
-        private static uint snc;
-        private static uint species_num;      
-
+        
         private static int time_step;
         private static int pro0or401;
-
+        private static uint species_num;
         private static string output_dir;
-        
 
-        private static int[] red    = new int[map8.maxLeg];
-        private static int[] green  = new int[map8.maxLeg];
-        private static int[] blue   = new int[map8.maxLeg];
+        private static int[] red = new int[map8.maxLeg];
+        private static int[] green = new int[map8.maxLeg];
+        private static int[] blue = new int[map8.maxLeg];
 
-        private static int[] red2   = new int[map8.maxLeg];
+        private static int[] red2 = new int[map8.maxLeg];
         private static int[] green2 = new int[map8.maxLeg];
-        private static int[] blue2  = new int[map8.maxLeg];
+        private static int[] blue2 = new int[map8.maxLeg];
 
-        private static int[] red3   = new int[map8.maxLeg];
+        private static int[] red3 = new int[map8.maxLeg];
         private static int[] green3 = new int[map8.maxLeg];
-        private static int[] blue3  = new int[map8.maxLeg];
+        private static int[] blue3 = new int[map8.maxLeg];
 
-        private static int[] red4   = new int[map8.maxLeg];
+        private static int[] red4 = new int[map8.maxLeg];
         private static int[] green4 = new int[map8.maxLeg];
-        private static int[] blue4  = new int[map8.maxLeg];
+        private static int[] blue4 = new int[map8.maxLeg];
 
         public static int reclassMethods = 0;
         public static int numAgeMaps = 0;
 
         public static List<string> BioMassFileNames = new List<string>();
-        public static List<string> BasalFileNames   = new List<string>();
-        public static List<string> TreesFileNames   = new List<string>();
-        public static List<string> IVFileNames      = new List<string>();
-        public static List<string> DBHFileNames     = new List<string>();
-        public static List<string> RDFileNames      = new List<string>();
-        public static List<string> SeedsFileNames   = new List<string>();
+        public static List<string> BasalFileNames = new List<string>();
+        public static List<string> TreesFileNames = new List<string>();
+        public static List<string> IVFileNames = new List<string>();
+        public static List<string> DBHFileNames = new List<string>();
+        public static List<string> RDFileNames = new List<string>();
+        public static List<string> SeedsFileNames = new List<string>();
 
         public static int flagoutputBiomass;
         public static int flagoutputBasal;
@@ -69,9 +64,11 @@ namespace Landis.Extension.Succession.Landispro
 
         public static double[] AgeDistOutputBuffer_TPA_landtype = null;
         public static double[] AgeDistOutputBuffer_BA_landtype = null;
+        public static string mapCRS = null;
+        public static double[] wAdfGeoTransform = new double[6];
+        //private static object DataType;
 
-
-        private static void Init_IO()
+        public static void Init_IO()
         {
             (new int[] { 0, 0, 100, 150, 200, 0, 0, 0, 150, 0, 150, 255, 80, 150, 255 }).CopyTo(red, 0);
             (new int[] { 0, 0, 0, 0, 0, 100, 150, 255, 0, 150, 150, 255, 80, 150, 255 }).CopyTo(green, 0);
@@ -89,13 +86,10 @@ namespace Landis.Extension.Succession.Landispro
             (new int[] { 0, 70, 0, 0, 0, 150, 200, 255, 30, 200, 50, 50, 200, 0, 255 }).CopyTo(green4, 0);
             (new int[] { 0, 70, 125, 200, 255, 0, 100, 0, 30, 50, 50, 0, 0, 255 }).CopyTo(blue4, 0);
 
-            
-            snr = PlugIn.gl_sites.numRows;
-            snc = PlugIn.gl_sites.numColumns;
-            species_num = PlugIn.gl_sites.SpecNum;
-
             time_step = PlugIn.gl_sites.SuccessionTimeStep;
             pro0or401 = PlugIn.gl_sites.Pro0or401;
+            species_num = PlugIn.gl_sites.SpecNum;
+            output_dir = PlugIn.gl_param.OutputDir;
         }
 
 
@@ -292,9 +286,9 @@ namespace Landis.Extension.Succession.Landispro
 
         public static void outputFileheader(StreamWriter outfile)
         {
-            outfile.Write("ncols  {0}\n", snc);
+            outfile.Write("ncols  {0}\n", PlugIn.gl_sites.numColumns);
 
-            outfile.Write("nrows  {0}\n", snr);
+            outfile.Write("nrows  {0}\n", PlugIn.gl_sites.numRows);
 
             //outfile.Write("xllcorner  {0}\n", succession.gl_sites.xLLCorner - succession.gl_sites.getHeader()[30] / 2);
             //outfile.Write("yllcorner  {0}\n", succession.gl_sites.yLLCorner - succession.gl_sites.getHeader()[30] * succession.gl_sites.numRows + succession.gl_sites.getHeader()[30] / 2);
@@ -304,7 +298,7 @@ namespace Landis.Extension.Succession.Landispro
 
             outfile.Write("xllcorner  {0}\n", PlugIn.gl_sites.XLLCorner - header_elemt / 2);
 
-            outfile.Write("yllcorner  {0}\n", PlugIn.gl_sites.YLLCorner - header_elemt * snr + header_elemt / 2);
+            outfile.Write("yllcorner  {0}\n", PlugIn.gl_sites.YLLCorner - header_elemt * PlugIn.gl_sites.numRows + header_elemt / 2);
 
             outfile.Write("cellsize  {0}\n", header_elemt);
 
@@ -315,7 +309,7 @@ namespace Landis.Extension.Succession.Landispro
 
         public static void initiateOutput_landis70Pro()
         {
-            
+
 
             if (reMethods[0] != "N/A")
             {
@@ -382,7 +376,7 @@ namespace Landis.Extension.Succession.Landispro
 
             double value = 0.0;
 
-            int age1 = 0, age2 = 0, year = 0;            
+            int age1 = 0, age2 = 0, year = 0;
 
             string str = output_dir + "/BA_TPADist.txt";
 
@@ -513,7 +507,7 @@ namespace Landis.Extension.Succession.Landispro
 
             //double TmpBasalAreaS = 0;
             double local_const = 3.1415926 / (4 * 10000.00);
-            
+
             int itr_m_timestep = itr * time_step;
 
             for (int k = 1; k <= species_num; ++k)
@@ -540,9 +534,9 @@ namespace Landis.Extension.Succession.Landispro
                             double TmpBasalAreaS = 0;
                             uint TmpTreesS = 0;
 
-                            for (uint i = snr; i > 0; --i)
+                            for (uint i = PlugIn.gl_sites.numRows; i > 0; --i)
                             {
-                                for (uint j = 1; j <= snc; ++j)
+                                for (uint j = 1; j <= PlugIn.gl_sites.numColumns; ++j)
                                 {
                                     landunit l = PlugIn.gl_sites.locateLanduPt(i, j);
 
@@ -568,41 +562,6 @@ namespace Landis.Extension.Succession.Landispro
                 }
 
 
-                // for (int count_age = 1; count_age <= age_range; count_age++)
-                // {
-                //     succession.gl_sites.GetAgeDistStat_AgeRangeVal(k - 1, count_age, ref age1, ref age2);
-
-                //     int beg = Math.Min(local_longevity, age1) / time_step;
-                //     int end = Math.Min(local_longevity, age2) / time_step;
-
-                //     for (int count_year = 1; count_year <= end_year; count_year++)
-                //     {
-                //         succession.gl_sites.GetAgeDistStat_YearVal(k - 1, count_year, ref year);
-
-                //         if (itr_m_timestep == year)
-                //         {
-                //             uint TmpTreesS = 0;
-
-                //             for (uint i = snr; i > 0; i--)
-                //             {
-                //                 for (uint j = 1; j <= snc; j++)
-                //                 {
-                //                     specie local_specie = succession.gl_sites[i, j].SpecieIndex(k);
-
-                //                     for (int m = beg; m <= end; m++)
-                //                     {
-                //                         TmpTreesS += local_specie.getTreeNum(m, k);
-                //                     }
-
-                //                 }
-
-                //             }
-
-                //             SetAgeDistoutputBuffer((int)enum1.TPA, k, count_age, count_year, TmpTreesS);
-                //         }
-
-                //     }
-                // }
             }
 
 
@@ -632,9 +591,9 @@ namespace Landis.Extension.Succession.Landispro
                                 double TmpBasalAreaS = 0;
                                 uint TmpTreesS = 0;
 
-                                for (uint i = snr; i > 0; i--)
+                                for (uint i = PlugIn.gl_sites.numRows; i > 0; i--)
                                 {
-                                    for (uint j = 1; j <= snc; j++)
+                                    for (uint j = 1; j <= PlugIn.gl_sites.numColumns; j++)
                                     {
                                         landunit l = PlugIn.gl_sites.locateLanduPt(i, j);
 
@@ -652,7 +611,7 @@ namespace Landis.Extension.Succession.Landispro
                                             }
                                         }
                                     }
-                                }                                
+                                }
 
                                 SetAgeDistoutputBuffer_Landtype((int)enum1.BA, k, count_age, count_year, count_landtype, TmpBasalAreaS);
 
@@ -664,42 +623,6 @@ namespace Landis.Extension.Succession.Landispro
 
                     }
 
-
-                    // for (int count_age = 1; count_age <= age_range; count_age++)
-                    // {
-                    //     succession.gl_sites.GetAgeDistStat_AgeRangeVal(k - 1, count_age, ref age1, ref age2);
-
-                    //     int beg = Math.Min(local_longevity, age1) / time_step;
-                    //     int end = Math.Min(local_longevity, age2) / time_step;
-
-                    //     for (int count_year = 1; count_year <= end_year; count_year++)
-                    //     {
-                    //         succession.gl_sites.GetAgeDistStat_YearVal(k - 1, count_year, ref year);
-
-                    //         if (itr_m_timestep == year)
-                    //         {
-                    //             uint TmpTreesS = 0;
-
-                    //             for (uint i = snr; i > 0; i--)
-                    //             {
-                    //                 for (uint j = 1; j <= snc; j++)
-                    //                 {
-                    //                     specie local_specie = succession.gl_sites[i, j].SpecieIndex(k);
-
-                    //                     if (succession.gl_sites.locateLanduPt(i, j) == succession.gl_landUnits[count_landtype])
-                    //                     {
-                    //                         for (int m = beg; m <= end; m++)
-                    //                         {
-                    //                             TmpTreesS += local_specie.getTreeNum(m, k);
-                    //                         }
-                    //                     }
-                    //                 }
-                    //             }
-
-                    //             SetAgeDistoutputBuffer_Landtype((int)enum1.TPA, k, count_age, count_year, count_landtype, TmpTreesS);
-                    //         }
-                    //     }
-                    // }
                 }
 
             }
@@ -726,9 +649,9 @@ namespace Landis.Extension.Succession.Landispro
             string[] papszMetadata = poDriver.GetMetadata("");
             string[] papszOptions = null;
 
-            double[] wAdfGeoTransform = new double[6] { 0.00, PlugIn.gl_param.CellSize, 0.00, 600.00, 0.00, -PlugIn.gl_param.CellSize };
+            
 
-            float[] pafScanline  = null;
+            float[] pafScanline = null;
             float[] pafScanline1 = null;
             float[] pafScanline2 = null;
             float[] pafScanline3 = null;
@@ -737,26 +660,16 @@ namespace Landis.Extension.Succession.Landispro
 
             int[] pintScanline = null;
 
-
-            SpatialReference oSRS = new SpatialReference(null);
-
-            oSRS.SetUTM(11, 1);
-
-            oSRS.SetWellKnownGeogCS("HEAD74");
-
-            string pszSRS_WKT = null;
-            oSRS.ExportToWkt(out pszSRS_WKT);
-
             //VSIFree(pszSRS_WKT);
-            pszSRS_WKT = null;
-            Band outPoBand  = null;
+
+            Band outPoBand = null;
             Band outPoBand1 = null;
             Band outPoBand2 = null;
             Band outPoBand3 = null;
             Band outPoBand4 = null;
             Band outPoBand5 = null;
 
-            Dataset poDstDS  = null;
+            Dataset poDstDS = null;
             Dataset poDstDS1 = null;
             Dataset poDstDS2 = null;
             Dataset poDstDS3 = null;
@@ -765,27 +678,24 @@ namespace Landis.Extension.Succession.Landispro
 
             Console.WriteLine("Start 7.0 Style writing output at {0}, itr = {1}", a1, itr);
 
-            //if (itr > 6)
-            //    Console.ReadLine();
 
             double local_const = 3.1415926 / (4 * 10000.00);
 
-            string output_dir_string = output_dir + "/";            
+            string output_dir_string = output_dir + "/";
             string local_string = "_" + (itr * time_step).ToString() + ".img";
             int cellsize_square = PlugIn.gl_sites.CellSize * PlugIn.gl_sites.CellSize;
 
 
-            int col_num = (int)snc;
-            int row_num = (int)snr;
+            int col_num = (int)PlugIn.gl_sites.numColumns;
+            int row_num = (int)PlugIn.gl_sites.numRows;
             int total_size = col_num * row_num;
 
             pafScanline = new float[total_size];
-            
+
             float Biomass_threshold = PlugIn.gl_sites.BiomassThreshold;
             for (int k = 1; k <= species_num; ++k)
             {
                 int m_max = PlugIn.gl_spe_Attrs[k].Longevity / time_step;
-
 
                 if (PlugIn.gl_sites.GetOutputGeneralFlagArray((uint)k - 1, (int)enum1.Bio) != 0)
                 {
@@ -793,8 +703,9 @@ namespace Landis.Extension.Succession.Landispro
                     {
                         string fpbiomass = (output_dir_string + BioMassFileNames[k - 1] + local_string);
 
-                        poDstDS = poDriver.Create(fpbiomass, col_num, row_num, 1, DataType.GDT_Float32, papszOptions);
 
+                        poDstDS = poDriver.Create(fpbiomass, col_num, row_num, 1, OSGeo.GDAL.DataType.GDT_Float32, papszOptions);
+                        poDstDS.SetProjection(mapCRS);
                         if (poDstDS == null)
                             throw new Exception("Img file not be created.");
 
@@ -827,7 +738,7 @@ namespace Landis.Extension.Succession.Landispro
 
                                 pafScanline[(row_num - i) * col_num + j - 1] = (float)TmpBiomassS;
 
-                                //if (itr > 9 && TmpBiomassS != 0)
+                                //if (itr > 29 && TmpBiomassS != 0)
                                 //    Console.Write("{0:F2} ", TmpBiomassS);
                             }
 
@@ -840,17 +751,14 @@ namespace Landis.Extension.Succession.Landispro
                     }
                 }
 
-
-
-
                 if (PlugIn.gl_sites.GetOutputGeneralFlagArray((uint)k - 1, (int)enum1.BA) != 0)
                 {
                     if (BasalFileNames[k - 1] != "N/A")
                     {
                         string fpbasal = output_dir_string + BasalFileNames[k - 1] + local_string;
 
-                        poDstDS = poDriver.Create(fpbasal, col_num, row_num, 1, DataType.GDT_Float32, papszOptions);//*
-
+                        poDstDS = poDriver.Create(fpbasal, col_num, row_num, 1, OSGeo.GDAL.DataType.GDT_Float32, papszOptions);//*
+                        poDstDS.SetProjection(mapCRS);
                         if (poDstDS == null)
                             throw new Exception("Img file not be created.");
 
@@ -877,7 +785,7 @@ namespace Landis.Extension.Succession.Landispro
 
                                 pafScanline[(row_num - i) * col_num + j - 1] = (float)TmpBasalAreaS;
 
-                                //if (itr > 9 && TmpBasalAreaS != 0)
+                                //if (itr > 29 && TmpBasalAreaS != 0)
                                 //    Console.Write("{0:F1} ", TmpBasalAreaS);
                             }
                         }
@@ -891,10 +799,7 @@ namespace Landis.Extension.Succession.Landispro
                     }
                 }
 
-
-
                 pintScanline = new int[total_size];
-
 
                 if (PlugIn.gl_sites.GetOutputGeneralFlagArray((uint)k - 1, (int)enum1.TPA) != 0)
                 {
@@ -902,8 +807,8 @@ namespace Landis.Extension.Succession.Landispro
                     {
                         string fptree = output_dir_string + TreesFileNames[k - 1] + local_string;
 
-                        poDstDS = poDriver.Create(fptree, col_num, row_num, 1, DataType.GDT_UInt32, papszOptions);//*
-
+                        poDstDS = poDriver.Create(fptree, col_num, row_num, 1, OSGeo.GDAL.DataType.GDT_UInt32, papszOptions);//*
+                        poDstDS.SetProjection(mapCRS);
                         poDstDS.SetGeoTransform(wAdfGeoTransform);
 
                         outPoBand = poDstDS.GetRasterBand(1);
@@ -925,15 +830,12 @@ namespace Landis.Extension.Succession.Landispro
                                 {
                                     TmpTreesS += (int)local_specis.getTreeNum(m, k);
                                 }
-
-                                pintScanline[(row_num - i) * col_num + j - 1] = TmpTreesS;
-
-                                //if (itr > 29 && TmpTreesS != 0) 
                                 //if (itr > 9 && TmpTreesS != 0)
-                                //    Console.Write("{0}", TmpTreesS);
+                                //    Console.Write("{0}\n", TmpTreesS);
+                                pintScanline[(row_num - i) * col_num + j - 1] = TmpTreesS;
                             }
                         }
-                        
+
                         outPoBand.WriteRaster(0, 0, col_num, row_num, pintScanline, col_num, row_num, 0, 0);
 
 
@@ -942,17 +844,14 @@ namespace Landis.Extension.Succession.Landispro
                     }
                 }
 
-
-
-
                 if (PlugIn.gl_sites.GetOutputGeneralFlagArray((uint)k - 1, (int)enum1.IV) != 0)
                 {
                     if (IVFileNames[k - 1] != "N/A")
                     {
                         string fpIV = output_dir_string + IVFileNames[k - 1] + local_string;
 
-                        poDstDS = poDriver.Create(fpIV, col_num, row_num, 1, DataType.GDT_Float32, papszOptions);//*
-
+                        poDstDS = poDriver.Create(fpIV, col_num, row_num, 1, OSGeo.GDAL.DataType.GDT_Float32, papszOptions);//*
+                        poDstDS.SetProjection(mapCRS);
                         if (poDstDS == null)
                             throw new Exception("Img file not be created.");
 
@@ -1019,15 +918,14 @@ namespace Landis.Extension.Succession.Landispro
 
 
 
-
                 if (PlugIn.gl_sites.GetOutputGeneralFlagArray((uint)k - 1, (int)enum1.Seeds) != 0)
                 {
                     if (SeedsFileNames[k - 1] != "N/A")
                     {
                         string fpSeeds = output_dir_string + SeedsFileNames[k - 1] + local_string;//* change
 
-                        poDstDS = poDriver.Create(fpSeeds, col_num, row_num, 1, DataType.GDT_UInt32, papszOptions);
-
+                        poDstDS = poDriver.Create(fpSeeds, col_num, row_num, 1, OSGeo.GDAL.DataType.GDT_UInt32, papszOptions);
+                        poDstDS.SetProjection(mapCRS);
                         if (poDstDS == null)
                             throw new Exception("Img file not be created.");
 
@@ -1060,8 +958,8 @@ namespace Landis.Extension.Succession.Landispro
                     {
                         string fpRD = output_dir_string + RDFileNames[k - 1] + local_string;
 
-                        poDstDS = poDriver.Create(fpRD, col_num, row_num, 1, DataType.GDT_Float32, papszOptions);//*
-
+                        poDstDS = poDriver.Create(fpRD, col_num, row_num, 1, OSGeo.GDAL.DataType.GDT_Float32, papszOptions);//*
+                        poDstDS.SetProjection(mapCRS);
                         if (poDstDS == null)
                             throw new Exception("Img file not be created.");
 
@@ -1112,7 +1010,7 @@ namespace Landis.Extension.Succession.Landispro
 
             int Bio_flag = PlugIn.gl_sites.GetOutputGeneralFlagArray(species_num, (int)enum1.Bio);
             int Car_flag = PlugIn.gl_sites.GetOutputGeneralFlagArray(species_num, (int)enum1.Car);
-            int  BA_flag = PlugIn.gl_sites.GetOutputGeneralFlagArray(species_num, (int)enum1.BA);
+            int BA_flag = PlugIn.gl_sites.GetOutputGeneralFlagArray(species_num, (int)enum1.BA);
             int RDenflag = PlugIn.gl_sites.GetOutputGeneralFlagArray(species_num, (int)enum1.RDensity);
             int TPA_flag = PlugIn.gl_sites.GetOutputGeneralFlagArray(species_num, (int)enum1.TPA);
 
@@ -1125,15 +1023,15 @@ namespace Landis.Extension.Succession.Landispro
                 pafScanline2 = new float[total_size];
                 pafScanline3 = new float[total_size];
                 pafScanline4 = new float[total_size];
-                pafScanline5 = new float[total_size];                
+                pafScanline5 = new float[total_size];
 
 
                 if (Bio_flag != 0)
                 {
                     string fpTotalBiomass = output_dir_string + "TotalBio" + local_string;
 
-                    poDstDS1 = poDriver.Create(fpTotalBiomass, col_num, row_num, 1, DataType.GDT_Float32, papszOptions);
-
+                    poDstDS1 = poDriver.Create(fpTotalBiomass, col_num, row_num, 1, OSGeo.GDAL.DataType.GDT_Float32, papszOptions);
+                    poDstDS1.SetProjection(mapCRS);
                     if (poDstDS1 == null)
                         throw new Exception("Img file not be created.");
 
@@ -1147,8 +1045,8 @@ namespace Landis.Extension.Succession.Landispro
                 {
                     string fpTotalcarbon = output_dir_string + "TotalCarbon" + local_string;
 
-                    poDstDS2 = poDriver.Create(fpTotalcarbon, col_num, row_num, 1, DataType.GDT_Float32, papszOptions);
-
+                    poDstDS2 = poDriver.Create(fpTotalcarbon, col_num, row_num, 1, OSGeo.GDAL.DataType.GDT_Float32, papszOptions);
+                    poDstDS2.SetProjection(mapCRS);
                     if (poDstDS2 == null)
                         throw new Exception("Img file not be created.");
 
@@ -1162,8 +1060,8 @@ namespace Landis.Extension.Succession.Landispro
                 {
                     string fptotalbasl = output_dir_string + "TotalBA" + local_string;
 
-                    poDstDS3 = poDriver.Create(fptotalbasl, col_num, row_num, 1, DataType.GDT_Float32, papszOptions);
-
+                    poDstDS3 = poDriver.Create(fptotalbasl, col_num, row_num, 1, OSGeo.GDAL.DataType.GDT_Float32, papszOptions);
+                    poDstDS3.SetProjection(mapCRS);
                     if (poDstDS3 == null)
                         throw new Exception("Img file not be created.");
 
@@ -1177,8 +1075,8 @@ namespace Landis.Extension.Succession.Landispro
                 {
                     string fptotaltrees = output_dir_string + "TotalTrees" + local_string;
 
-                    poDstDS4 = poDriver.Create(fptotaltrees, col_num, row_num, 1, DataType.GDT_UInt32, papszOptions);
-
+                    poDstDS4 = poDriver.Create(fptotaltrees, col_num, row_num, 1, OSGeo.GDAL.DataType.GDT_UInt32, papszOptions);
+                    poDstDS4.SetProjection(mapCRS);
                     if (poDstDS4 == null)
                         throw new Exception("Img file not be created.");
 
@@ -1193,8 +1091,8 @@ namespace Landis.Extension.Succession.Landispro
                 {
                     string fpRD = output_dir_string + "RelativeDensity" + local_string;
 
-                    poDstDS5 = poDriver.Create(fpRD, col_num, row_num, 1, DataType.GDT_Float32, papszOptions);
-
+                    poDstDS5 = poDriver.Create(fpRD, col_num, row_num, 1, OSGeo.GDAL.DataType.GDT_Float32, papszOptions);
+                    poDstDS5.SetProjection(mapCRS);
                     if (poDstDS5 == null)
                         throw new Exception("Img file not be created.");
 
@@ -1369,8 +1267,8 @@ namespace Landis.Extension.Succession.Landispro
                             {
                                 string fpbiomass = output_dir_string + BioMassFileNames[k - 1] + "_Age" + Agerangeage1 + "_Age" + Agerangeage2 + local_string;
 
-                                poDstDS = poDriver.Create(fpbiomass, col_num, row_num, 1, DataType.GDT_Float32, papszOptions);//*
-
+                                poDstDS = poDriver.Create(fpbiomass, col_num, row_num, 1, OSGeo.GDAL.DataType.GDT_Float32, papszOptions);//*
+                                poDstDS.SetProjection(mapCRS);
                                 if (poDstDS == null)
                                     throw new Exception("Img file not be created.");
 
@@ -1432,8 +1330,8 @@ namespace Landis.Extension.Succession.Landispro
                             {
                                 string fpbasal = output_dir_string + BasalFileNames[k - 1] + "_Age" + Agerangeage1 + "_Age" + Agerangeage2 + local_string;
 
-                                poDstDS = poDriver.Create(fpbasal, col_num, row_num, 1, DataType.GDT_Float32, papszOptions);
-
+                                poDstDS = poDriver.Create(fpbasal, col_num, row_num, 1, OSGeo.GDAL.DataType.GDT_Float32, papszOptions);
+                                poDstDS.SetProjection(mapCRS);
                                 if (poDstDS == null)
                                     throw new Exception("Img file not be created.");
 
@@ -1490,8 +1388,8 @@ namespace Landis.Extension.Succession.Landispro
                             {
                                 string fptree = output_dir_string + TreesFileNames[k - 1] + "_Age" + Agerangeage1 + "_Age" + Agerangeage2 + local_string;
 
-                                poDstDS = poDriver.Create(fptree, col_num, row_num, 1, DataType.GDT_UInt32, papszOptions);
-
+                                poDstDS = poDriver.Create(fptree, col_num, row_num, 1, OSGeo.GDAL.DataType.GDT_UInt32, papszOptions);
+                                poDstDS.SetProjection(mapCRS);
                                 if (poDstDS == null)
                                     throw new Exception("Img file not be created.");
 
@@ -1546,8 +1444,8 @@ namespace Landis.Extension.Succession.Landispro
                             if (IVFileNames[k - 1] != "N/A")
                             {
                                 string fpIV = output_dir_string + IVFileNames[k - 1] + "_Age" + Agerangeage1 + "_Age" + Agerangeage2 + local_string;
-                                poDstDS = poDriver.Create(fpIV, col_num, row_num, 1, DataType.GDT_Float32, papszOptions);
-
+                                poDstDS = poDriver.Create(fpIV, col_num, row_num, 1, OSGeo.GDAL.DataType.GDT_Float32, papszOptions);
+                                poDstDS.SetProjection(mapCRS);
                                 if (poDstDS == null)
                                     throw new Exception("Img file not be created.");
 
@@ -1628,11 +1526,11 @@ namespace Landis.Extension.Succession.Landispro
 
                 }
 
-                
+
                 //below is for age range  total 
                 int Bio_endagerange_flag = PlugIn.gl_sites.GetOutputAgerangeFlagArray(species_num, (int)enum1.Bio);
                 int Car_endagerange_flag = PlugIn.gl_sites.GetOutputAgerangeFlagArray(species_num, (int)enum1.Car);
-                int  BA_endagerange_flag = PlugIn.gl_sites.GetOutputAgerangeFlagArray(species_num, (int)enum1.BA);
+                int BA_endagerange_flag = PlugIn.gl_sites.GetOutputAgerangeFlagArray(species_num, (int)enum1.BA);
                 int TPA_endagerange_flag = PlugIn.gl_sites.GetOutputAgerangeFlagArray(species_num, (int)enum1.TPA);
                 int RDenendagerange_flag = PlugIn.gl_sites.GetOutputAgerangeFlagArray(species_num, (int)enum1.RDensity);
 
@@ -1640,8 +1538,8 @@ namespace Landis.Extension.Succession.Landispro
                 {
                     string fpTotalBiomass = output_dir_string + "TotalBio_AgeRange" + local_string;
 
-                    poDstDS1 = poDriver.Create(fpTotalBiomass, col_num, row_num, 1, DataType.GDT_Float32, papszOptions);
-
+                    poDstDS1 = poDriver.Create(fpTotalBiomass, col_num, row_num, 1, OSGeo.GDAL.DataType.GDT_Float32, papszOptions);
+                    poDstDS1.SetProjection(mapCRS);
                     if (poDstDS1 == null)
                         throw new Exception("Img file not be created.");
 
@@ -1654,8 +1552,8 @@ namespace Landis.Extension.Succession.Landispro
                 if (TPA_endagerange_flag != 0)
                 {
                     string fpTotaltrees = output_dir_string + "TotalTrees_AgeRange" + local_string;
-                    poDstDS2 = poDriver.Create(fpTotaltrees, col_num, row_num, 1, DataType.GDT_UInt32, papszOptions);
-
+                    poDstDS2 = poDriver.Create(fpTotaltrees, col_num, row_num, 1, OSGeo.GDAL.DataType.GDT_UInt32, papszOptions);
+                    poDstDS2.SetProjection(mapCRS);
                     if (poDstDS2 == null)
                         throw new Exception("Img file not be created.");
 
@@ -1668,8 +1566,8 @@ namespace Landis.Extension.Succession.Landispro
                 if (BA_endagerange_flag != 0)
                 {
                     string fpTotalbasl = output_dir_string + "TotalBasal_AgeRange" + local_string;
-                    poDstDS3 = poDriver.Create(fpTotalbasl, col_num, row_num, 1, DataType.GDT_Float32, papszOptions);
-
+                    poDstDS3 = poDriver.Create(fpTotalbasl, col_num, row_num, 1, OSGeo.GDAL.DataType.GDT_Float32, papszOptions);
+                    poDstDS3.SetProjection(mapCRS);
                     if (poDstDS3 == null)
                         throw new Exception("Img file not be created.");
 
@@ -1684,8 +1582,8 @@ namespace Landis.Extension.Succession.Landispro
                 {
                     string fpTotalcarbon = output_dir_string + "TotalCarbon_AgeRange" + local_string;
 
-                    poDstDS4 = poDriver.Create(fpTotalcarbon, col_num, row_num, 1, DataType.GDT_Float32, papszOptions);
-
+                    poDstDS4 = poDriver.Create(fpTotalcarbon, col_num, row_num, 1, OSGeo.GDAL.DataType.GDT_Float32, papszOptions);
+                    poDstDS4.SetProjection(mapCRS);
                     if (poDstDS4 == null)
                         throw new Exception("Img file not be created.");
 
@@ -1700,7 +1598,7 @@ namespace Landis.Extension.Succession.Landispro
                 {
                     string fpTotalRD = output_dir_string + "TotalRD_AgeRange" + local_string;
 
-                    poDstDS5 = poDriver.Create(fpTotalRD, col_num, row_num, 1, DataType.GDT_Float32, papszOptions);
+                    poDstDS5 = poDriver.Create(fpTotalRD, col_num, row_num, 1, OSGeo.GDAL.DataType.GDT_Float32, papszOptions);
 
                     if (poDstDS5 == null)
                         throw new Exception("Img file not be created.");
@@ -1758,7 +1656,7 @@ namespace Landis.Extension.Succession.Landispro
                                     for (int m = beg; m <= end; m++)
                                     {
                                         float local_term1 = PlugIn.gl_sites.GetGrowthRates(k, m, l.LtID);
-                                        uint  local_term2 = PlugIn.gl_sites[i, j].SpecieIndex(k).getTreeNum(m, k);
+                                        uint local_term2 = PlugIn.gl_sites[i, j].SpecieIndex(k).getTreeNum(m, k);
 
                                         double combination1 = Math.Exp(tmp_term1 + tmp_term2 * Math.Log(local_term1)) * local_term2;
 
@@ -1851,7 +1749,7 @@ namespace Landis.Extension.Succession.Landispro
             }
 
 
-            pafScanline  = null;
+            pafScanline = null;
             pafScanline1 = null;
             pafScanline2 = null;
             pafScanline3 = null;
@@ -1891,7 +1789,7 @@ namespace Landis.Extension.Succession.Landispro
                 {
                     string gl_spe_attrs_i_name = PlugIn.gl_spe_Attrs[i].Name;
 
-                    Console.Write("creating {0} {1} {2} {3}\n", species_num, rep, gl_spe_attrs_i_name, "age map");
+                    Console.Write("creating {0} {1} {2} {3}\n", PlugIn.gl_sites.SpecNum, rep, gl_spe_attrs_i_name, "age map");
 
                     reclass.speciesAgeMap(m, gl_spe_attrs_i_name);
 
@@ -1911,7 +1809,7 @@ namespace Landis.Extension.Succession.Landispro
 
             reclass.ageReclassYoungest(m);
             m.CellSize = PlugIn.gl_param.CellSize;
-            str        = output_dir + "/ageYoungest" + local_string;
+            str = output_dir + "/ageYoungest" + local_string;
             m.write(str, red2, green2, blue2);
 
 
@@ -1919,183 +1817,10 @@ namespace Landis.Extension.Succession.Landispro
 
             Console.Write("\nFinish 6.0 Style writing output at {0}\n", ltimeTemp);
 
-            Console.Write("it took {0} seconds\n", ltimeTemp - ltime);
+            Console.Write("it took {0} seconds\n\n", ltimeTemp - ltime);
 
+            Console.WriteLine("========================================\n");
         }
-
-
-
-        // public static void ioTerm()
-        // {
-        //     Console.Write("Ending Landis Run.\n");
-        // }
-
-
-
-        //This will read in the global variable sites from class file and map file.
-        //Class file is a file containing site descriptions for a set of class values.
-        //Map file contains the corresponding map.  Thus every value in mapFile
-        //is represented by the cooresponding class descritption represented in
-        //classFile.  mapFile is an Erdas 8 bit gis file.  The file pointer is
-        //placed on the first map element.  yDim and xDim are the (x,y) dimensions of the Erdas map.        
-        /*
-        public static void inputBin8(StreamReader classFile, BinaryReader mapFile, Dataset simgFileint, uint yDim, uint xDim, int b16or8)
-        {
-            Console.Write("reading age cohort in inputBin8\n");
-
-            uint site_num = 0;
-
-            if (b16or8 == 8)
-                site_num = 256;
-            else if (b16or8 == 16)
-                site_num = 50000;
-
-            Band poBand = simgFileint.GetRasterBand(1);
-
-            site[] s = new site[site_num];
-            for (int i = 0; i < site_num; i++)
-                s[i] = new site();
-
-            int numCovers = 0;
-
-            while (!system1.LDeof(classFile))
-            {
-                s[numCovers].read(classFile);
-
-                numCovers++;
-            }
-
-            
-            int[] combineMatrix = null;             
-
-            //build sites and copy sites to sorted array, this array will be sorted later.
-            if (pro0or401 == 0)
-            {
-                for (int i = 0; i < numCovers; i++)
-                    PlugIn.gl_sites.SortedIndex.Add(s[i]);
-
-                //combineMatrix is used to mark which site is redundant, as well as this site is the same with which one
-                combineMatrix = new int[numCovers];
-
-                for (int i = 0; i < numCovers; i++)
-                    combineMatrix[i] = i;
-            }
-
-
-
-            if (pro0or401 == 0)
-                lookupredundant(combineMatrix, numCovers);
-
-
-            Console.Write("Reading species composition map: b16or8 = {0}\n", b16or8);
-
-            float[] pafScanline = new float[(xDim * yDim)];
-
-            poBand.ReadRaster(0, 0, (int)xDim, (int)yDim, pafScanline, (int)xDim, (int)yDim, 0, 0);
-
-            if (b16or8 == 8)  //8 bit
-            {
-                for (uint i = yDim; i > 0; i--)
-                {
-                    for (uint j = 1; j <= xDim; j++)
-                    {
-                        byte uqi_byte = mapFile.ReadByte();
-
-                        int coverType = Convert.ToInt32(uqi_byte);
-                        int coverType1 = (int)pafScanline[(yDim - i) * xDim + j - 1];
-
-                        System.Diagnostics.Debug.Assert(coverType == coverType1);
-
-                        //Console.WriteLine("cvoerType = {0}", coverType);
-
-                        if (coverType < numCovers && coverType >= 0)
-                        {
-                            if (pro0or401 == 0)
-                            {
-                                site local_site = PlugIn.gl_sites.SortedIndex[combineMatrix[coverType]];
-
-                                PlugIn.gl_sites.fillinSitePt(i, j, local_site);
-
-                                local_site.NumSites++;
-                            }
-                            else
-                            {
-                                PlugIn.gl_sites[i, j] = new site();
-                                PlugIn.gl_sites[i, j].copy(s[coverType]);
-                            }
-                        }
-                        else
-                        {
-                            s = null;
-                            throw new Exception("Error reading in coverType from the map file");
-                        }
-
-                    }
-
-                }
-
-            }
-
-            else if (b16or8 == 16)
-            {
-                for (uint i = yDim; i > 0; i--)
-                {
-                    for (uint j = 1; j <= xDim; j++)
-                    {
-                        int coverType = mapFile.ReadUInt16();
-                        int coverType1 = (int)pafScanline[(yDim - i) * xDim + j - 1];
-
-                        System.Diagnostics.Debug.Assert(coverType == coverType1);
-
-                        if (coverType < numCovers && coverType >= 0)
-                        {
-                            if (pro0or401 == 0)
-                            {
-                                site local_site = PlugIn.gl_sites.SortedIndex[combineMatrix[coverType]];
-
-                                PlugIn.gl_sites.fillinSitePt(i, j, local_site);
-
-                                local_site.NumSites++;
-                            }
-                            else
-                            {
-                                PlugIn.gl_sites[i, j] = new site();
-                                PlugIn.gl_sites[i, j].copy(s[coverType]);
-                            }
-
-                        }
-                        else if (coverType != 55537)  //weili
-                        {
-                            s = null;
-                            throw new Exception("Error reading in coverType from the map file");
-                        }
-
-                    }
-
-                }
-
-            }
-
-
-
-            if (pro0or401 == 0)
-            {
-                Console.Write("releasing redundant memory\n");
-
-                deleteRedundantInitial(combineMatrix, numCovers);
-
-                PlugIn.gl_sites.SITE_sort();
-
-                combineMatrix = null;
-            }
-
-
-            Console.WriteLine("end inputBin8\n");
-        }*/
-
-
-
-
 
 
         //This will read in the global variable sites from class file and simgFileint file.
@@ -2140,15 +1865,15 @@ namespace Landis.Extension.Succession.Landispro
             }
             */
             var tmp = Landis.Data.Load<SpeciesParam>(ReclassInFile, new SpeciesParamParser());
-            site[] s = new site[tmp.Count/species.NumSpec];
+            site[] s = new site[tmp.Count / species.NumSpec];
             if (tmp.Count % species.NumSpec != 0)
                 throw new Exception("In_Output: number of lines in " + ReclassInFile + " cannot devided by number of species");
             numCovers = s.Length;
             int now = 0;
-            for(int i=0;i<s.Length;++i)
+            for (int i = 0; i < s.Length; ++i)
             {
                 s[i] = new site();
-                for(int j=1;j<=s[0].Num_Species;++j)
+                for (int j = 1; j <= s[0].Num_Species; ++j)
                 {
                     s[i][j].VegPropagules = tmp.VegPropagules(now);
                     s[i][j].setAgeVector(tmp.Agevector(now));
@@ -2196,7 +1921,6 @@ namespace Landis.Extension.Succession.Landispro
 
             Console.Write("Reading species composition map in inputImgSpec1\n");
 
-
             for (uint i = (uint)yDim; i > 0; i--)
             {
                 for (uint j = 1; j <= xDim; j++)
@@ -2215,6 +1939,7 @@ namespace Landis.Extension.Succession.Landispro
                         {
                             PlugIn.gl_sites[i, j] = new site();
                             PlugIn.gl_sites[i, j].copy(s[coverType]);
+                            SiteVars.Cohorts[PlugIn.ModelCore.Landscape.GetSite((int)i, (int)j)] = s[coverType];
                         }
 
                     }
@@ -2241,179 +1966,10 @@ namespace Landis.Extension.Succession.Landispro
         }
 
 
-
-
-        //This will read in the global variable sites from class file and map file.
-        //Class file is a file containing site descriptions for a set of class values.
-        //Map file contains the corresponding map.  Thus every value in mapFile
-        //is represented by the cooresponding class descritption represented in
-        //classFile.  mapFile is an Erdas 16 bit gis file.  The file pointer is
-        //placed on the first map element.  yDim and xDim are the (x,y) dimensions
-        //of the Erdas map.
-        /*void inputBin16(StreamReader classFile, BinaryReader mapFile, uint yDim, uint xDim)
-        {
-            Console.WriteLine("reading age cohort in inputBin16");
-
-            int numCovers = 0;
-
-
-            site[] s = new site[50000]; //number is temporary //
-
-            while (!system1.LDeof(classFile))
-            {
-                s[numCovers].read(classFile);
-
-                numCovers++;
-            }
-
-
-            //build sites and copy sites to sorted array, this array will be sorted later.
-            for (int i = 0; i < numCovers; i++)
-                PlugIn.gl_sites.SortedIndex.Add(s[i]);
-
-
-            int[] combineMatrix = new int[numCovers];
-
-            for (int i = 0; i < numCovers; i++)
-                combineMatrix[i] = i;
-
-
-            lookupredundant(combineMatrix, numCovers);
-
-
-            Console.Write("Reading species composition map\n");
-
-            for (uint i = yDim; i > 0; i--)
-            {
-                for (uint j = 1; j <= xDim; j++)
-                {
-                    int coverType = mapFile.ReadUInt16();
-
-                    site local_site = PlugIn.gl_sites.SortedIndex[combineMatrix[coverType]];
-
-                    if (coverType < numCovers && coverType > 0)
-                        PlugIn.gl_sites.fillinSitePt(i, j, local_site);
-                    else
-                        PlugIn.gl_sites.fillinSitePt(i, j, PlugIn.gl_sites.SortedIndex[0]);
-
-                    local_site.NumSites++;
-                }
-
-            }
-
-
-
-            Console.Write("releasing redundant memory\n");
-
-            deleteRedundantInitial(combineMatrix, numCovers);
-
-            PlugIn.gl_sites.SITE_sort();
-
-            combineMatrix = null;
-
-        }*/
-
-
-
-
-
-        //This will read landtype map and associate landUnit to each site.
-        //mapFile is an Erdas 8 bit gis file.  The file pointer is
-        //placed on the first map element.  yDim and xDim are the (x,y) dimensions
-        //of the Erdas map.
-        /*public static void inputLandtypeMap8(BinaryReader mapFile, Dataset ltimgFile, uint xDim, uint yDim, pdp ppdp)
-        {
-            uint[] dest = new uint[32];
-
-            //LDfread((char*)dest, 4, 32, mapFile);
-            for (int i = 0; i < 32; i++)
-                dest[i] = mapFile.ReadUInt32();
-
-            int b16or8;   //true: 16, false 8 bit
-
-            if ((dest[1] & 0xff0000) == 0x020000)
-                b16or8 = 16;
-            else if ((dest[1] & 0xff0000) == 0)
-                b16or8 = 8;
-            else
-                throw new Exception("Error: IO: Landtype map is neither 16 bit or 8 bit.");
-
-            float[] pafScanline = null;
-
-            Band poBand = ltimgFile.GetRasterBand(1);
-
-            uint nCols = (uint)dest[4];
-            uint nRows = (uint)dest[5];
-            uint nCols1 = (uint)ltimgFile.RasterXSize;
-
-            uint nRows1 = (uint)ltimgFile.RasterYSize;
-
-            //System.Diagnostics.Debug.Assert((nCols == nCols1) && (nRows == nRows1));
-
-            if ((nCols != nCols1) || (nRows != nRows1))
-                throw new Exception("landtype gis map and landtype img map do not match.");
-
-            if ((nCols != xDim) || (nRows != yDim))
-                throw new Exception("landtype map and species map do not match.");
-
-
-            if (b16or8 == 8)  //8 bit
-            {
-                for (uint i = yDim; i > 0; i--)
-                {
-                    for (uint j = 1; j <= xDim; j++)
-                    {
-                        int coverType = mapFile.Read();
-                        int coverType1 = (int)pafScanline[(yDim - i) * xDim + j - 1];
-
-                        System.Diagnostics.Debug.Assert(coverType == coverType1);
-
-                        if (coverType >= 0)
-                        {
-                            PlugIn.gl_sites.fillinLanduPt(i, j, PlugIn.gl_landUnits[coverType]);
-                        }
-                        else
-                            throw new Exception("illegel landtype class found.");
-
-                    }
-
-                }
-
-            }
-
-            else if (b16or8 == 16)  //16 bit
-            {
-                for (uint i = yDim; i > 0; i--)
-                {
-                    for (uint j = 1; j <= xDim; j++)
-                    {
-                        int coverType = mapFile.ReadUInt16();
-                        int coverType1 = (int)pafScanline[(yDim - i) * xDim + j - 1];
-
-                        System.Diagnostics.Debug.Assert(coverType == coverType1);
-
-                        if (coverType >= 0)
-                        {
-                            PlugIn.gl_sites.fillinLanduPt(i, j, PlugIn.gl_landUnits[coverType]);
-                        }
-                        else
-                            throw new Exception("illegel landtype class found.");
-
-                    }
-
-                }
-
-            }
-        }
-
-            */
-
-
-
         //This will read in all LANDIS global variables.
         //public static void getInput(int[] freq, string[] reMethods, string[] ageMap, pdp ppdp, int BDANo, double[] wAdfGeoTransform)
         //public static void getInput(int[] freq, string[] ageMap, pdp ppdp, int BDANo, double[] wAdfGeoTransform)
-        public static void getInput(int[] freq, string[] ageMap, pdp ppdp, double[] wAdfGeoTransform)
+        public static void getInput(int[] freq, string[] ageMap, pdp ppdp)
         {
             //BinaryReader ltMapFile = new BinaryReader(File.Open(succession.gl_param.landUnitMapFile, FileMode.Open)),
 
@@ -2422,21 +1978,24 @@ namespace Landis.Extension.Succession.Landispro
                 throw new Exception("species img map input file not found.");
 
             double[] adfGeoTransform = new double[6];
-
+            
+            
+            string mapProj = simgFile.GetProjectionRef();
+            
             //this might be potentially problematic
             simgFile.GetGeoTransform(adfGeoTransform);
 
             for (int i = 0; i < 6; i++)
                 wAdfGeoTransform[i] = adfGeoTransform[i];
-
+            
+            mapCRS = simgFile.GetProjectionRef();
             Gdal.AllRegister();
 
             Console.WriteLine("Reading input.");
 
-            output_dir = PlugIn.gl_param.OutputDir;
+            Console.WriteLine("output dir is {0}", output_dir);
             DirectoryInfo dir = new DirectoryInfo(output_dir);
             dir.Create();
-            
 
             Timestep.Set_SpecNum(PlugIn.gl_spe_Attrs.NumAttrs);
 
@@ -2459,8 +2018,8 @@ namespace Landis.Extension.Succession.Landispro
             PlugIn.gl_sites.dim(PlugIn.gl_spe_Attrs.NumAttrs, nRows, nCols);
             PlugIn.gl_sites.Read70OutputOption(PlugIn.gl_param.OutputOption70);
 
-            Init_IO();
-            ppdp.set_parameters(gDLLMode, snc, snr);
+            
+            ppdp.set_parameters(gDLLMode, PlugIn.gl_sites.numColumns, PlugIn.gl_sites.numRows);
 
 
             //inputBin8(rcFile, siFile, nRows, nCols, b16or8); // need to change Qia Oct 06 2008
@@ -2497,7 +2056,7 @@ namespace Landis.Extension.Succession.Landispro
                 string temp = system1.read_string(freqOfOutput);
 
                 freq[c] = int.Parse(temp);
-                Console.WriteLine("freq[{0}] = {1}", c, freq[c]);
+
                 //if ((freq[c] > succession.gl_sites.TimeStep) && (freq[c] % succession.gl_sites.TimeStep != 0))
                 //    throw new Exception("Illegal frequency value encountered."); //Nim: changed spelling
 
@@ -2547,86 +2106,6 @@ namespace Landis.Extension.Succession.Landispro
 
             freqOfOutput.Close();
 
-            //}
-
-            //    else
-
-            //    {
-
-            //    freq[0] = 1; freq[1] = 1; freq[2] = 1; freq[3] = 1; freq[4] = 1;
-
-
-            //    Console.Write("file <FREQ_OUT.PUT> not found\n");
-
-
-            //    Console.Write("creating file\n");
-
-
-            //    Console.Write("frequency of output unknown assuming every iteration\n");
-
-
-            //    if ((freqOfOutput = LDfopen("freq_out.put", 3)) != null)
-
-            //    {
-
-            //        freqOfOutput.Write("#This file establishes the number of years for output for reclass methods#\n");
-
-            //        freqOfOutput.Write("#fire, wind, timber, and age class. A one (1) in any field will produce maps#\n");
-
-            //        freqOfOutput.Write("#every iteration#\n");
-
-            //        freqOfOutput.Write("#output maps for reclass#  2\n");
-
-            //        freqOfOutput.Write("#output maps for fire# 1\n");
-
-            //        freqOfOutput.Write("#output maps for wind# 1\n");
-
-            //        freqOfOutput.Write("#output maps for timber# 1\n");
-
-            //        freqOfOutput.Write("#output maps for age class# 2\n");
-
-
-            //        LDfclose(freqOfOutput);
-
-            //    }
-
-
-
-            //}
-
-
-            /*using (StreamReader palleteFile = new StreamReader(succession.gl_param.default_plt))
-            {
-                int colNum;
-
-                for (colNum = 0; colNum <= 15; colNum++) //Nim: changed int colNum to colNum
-                {
-                      red[colNum] = system1.read_int(palleteFile);
-                    green[colNum] = system1.read_int(palleteFile);
-                     blue[colNum] = system1.read_int(palleteFile);
-                }
-
-                for (colNum = 0; colNum <= 15; colNum++) //Nim: changed int colNum to colNum
-                {
-                      red2[colNum] = system1.read_int(palleteFile);
-                    green2[colNum] = system1.read_int(palleteFile);
-                     blue2[colNum] = system1.read_int(palleteFile);
-                }
-                
-                for (colNum = 0; colNum <= 15; colNum++) //Nim: changed int colNum to colNum
-                {
-                      red3[colNum] = system1.read_int(palleteFile);
-                    green3[colNum] = system1.read_int(palleteFile);
-                     blue3[colNum] = system1.read_int(palleteFile);
-                }
-                
-                for (colNum = 0; colNum <= 15; colNum++) //Nim: changed int colNum to colNum
-                {
-                      red4[colNum] = system1.read_int(palleteFile);
-                    green4[colNum] = system1.read_int(palleteFile);
-                     blue4[colNum] = system1.read_int(palleteFile);
-                }
-            }*/
 
             //Set age colors to a spectrum.
             if ((gDLLMode & defines.G_WIND) != 0)
@@ -2784,7 +2263,7 @@ namespace Landis.Extension.Succession.Landispro
 
             pfScenario.Write("numberOfIterations:	{0}\n", PlugIn.gl_param.Num_Iteration);
 
-            pfScenario.Write("Map size:		Row: {0} x Col: {1}\n", snr, snc);
+            pfScenario.Write("Map size:		Row: {0} x Col: {1}\n", PlugIn.gl_sites.numRows, PlugIn.gl_sites.numColumns);
 
 
 
@@ -2873,7 +2352,7 @@ namespace Landis.Extension.Succession.Landispro
             InputVar<int> int_val = new InputVar<int>("int value");
             while (!AtEndOfInput)
             {
-                Edu.Wisc.Forest.Flel.Util.StringReader currentLine = new Edu.Wisc.Forest.Flel.Util.StringReader(CurrentLine);
+                Landis.Utilities.StringReader currentLine = new Landis.Utilities.StringReader(CurrentLine);
                 ReadValue(int_val, currentLine);
                 ret.addVegPropagules((short)int_val.Value.Actual);
                 List<uint> tmp = new List<uint>();
@@ -2882,7 +2361,7 @@ namespace Landis.Extension.Succession.Landispro
                 {
                     ReadValue(int_val, currentLine);
                     tmp.Add((uint)int_val.Value.Actual);
-                    Edu.Wisc.Forest.Flel.Util.TextReader.SkipWhitespace(currentLine);
+                    Landis.Utilities.TextReader.SkipWhitespace(currentLine);
                 }
                 ret.addAgevector(tmp.ToArray());
                 GetNextLine();

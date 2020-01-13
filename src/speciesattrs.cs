@@ -107,6 +107,32 @@ namespace Landis.Extension.Succession.Landispro
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 		//Write set of species attributes to a file.
 		public void write(StreamWriter outfile)
         {

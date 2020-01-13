@@ -4,11 +4,14 @@ using System.Linq;
 using System.Text;
 //using System.Threading.Tasks;
 using System.IO;
-
+using Landis.Library.Cohorts;
+using Landis.Core;
+using System.Collections;
+using Landis.Library.AgeOnlyCohorts;
 
 namespace Landis.Extension.Succession.Landispro
 {
-    public class specie : agelist
+    public class specie : agelist, Library.AgeOnlyCohorts.ISpeciesCohorts
     {
         private short vegPropagules;      //Number of years of vegetative propagules present.
         private short disPropagules;      //Number of years of dispersed propagules present.
@@ -17,6 +20,7 @@ namespace Landis.Extension.Succession.Landispro
 
         private int treesFromVeg;
         private uint matureTree;
+        private int index;
 
 
         public short DisPropagules
@@ -45,6 +49,10 @@ namespace Landis.Extension.Succession.Landispro
             set { availableSeed = value; }
         }
 
+        internal void AddNewCohort()
+        {
+            agevector[0] += 1;
+        }
 
         public uint MatureTree
         {
@@ -55,10 +63,11 @@ namespace Landis.Extension.Succession.Landispro
 
 
         //Constructor.
-        public specie()
+        public specie(int index)
         {
             vegPropagules = 0;
             disPropagules = 0;
+            this.index = index;
         }
 
 
@@ -202,6 +211,8 @@ namespace Landis.Extension.Succession.Landispro
 
             matureTree    = in_specie.MatureTree;
 
+            index = in_specie.index;
+
             base.copy(in_specie.agevector);
         }
 
@@ -221,9 +232,93 @@ namespace Landis.Extension.Succession.Landispro
             agevector = v;
         }
 
+        private class MyCohort : Landis.Library.Cohorts.ICohort
+        {
+            private int number, age;
+            private ISpecies spe;
+
+            public MyCohort(ISpecies spe, int n, int a)
+            {
+                this.spe = spe;
+                this.number = n;
+                this.age = a;
+            }
+
+            public ISpecies Species
+            {
+                get
+                {
+                    return spe;
+                }
+            }
+        }
+
+        public IEnumerator<Landis.Library.Cohorts.ICohort> GetEnumerator()
+        {
+            for (int i = 0; i < Length; ++i)
+                if (agevector[i] > 0)
+                    yield return new MyCohort(Species, (int)agevector[i], i);
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return ((IEnumerable<Landis.Library.Cohorts.ICohort>)this).GetEnumerator();
+        }
+
         internal int Length
         {
             get { return agevector.Length; }
+        }
+
+        public int Count
+        {
+            get
+            {
+                int ret=0;
+                for (int i = 0; i < Length; ++i)
+                    if (agevector[i] != 0)
+                        ret += 1;
+                return ret;
+            }
+        }
+
+        public ISpecies Species
+        {
+            get
+            {
+                return PlugIn.ModelCore.Species[index];
+            }
+        }
+
+        public bool IsMaturePresent
+        {
+            get
+            {
+                for (int i = PlugIn.ModelCore.Species[index].Longevity / PlugIn.gl_param.SuccessionTimestep; i < Length; ++i)
+                    if (agevector[i] > 0)
+                        return true;
+                return false;
+            }
+        }
+
+        internal void RemoveMarkedCohorts(ISpeciesCohortsDisturbance disturbance)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal void RemoveMarkedCohorts(ICohortDisturbance disturbance)
+        {
+            for (int i = 0; i < agevector.Length; ++i)
+                if (agevector[i] > 0)
+                    if (disturbance.MarkCohortForDeath(new Library.AgeOnlyCohorts.Cohort(Species, (ushort)i)))
+                        agevector[i] = 0;
+        }
+
+        IEnumerator<Library.AgeOnlyCohorts.ICohort> IEnumerable<Library.AgeOnlyCohorts.ICohort>.GetEnumerator()
+        {
+            for (int i = 0; i < agevector.Length; ++i)
+                if(agevector[i]>0)
+                    yield return new Library.AgeOnlyCohorts.Cohort(Species, (ushort)agevector[i]);
         }
     }
 }
