@@ -8,7 +8,7 @@ using System.Diagnostics;
 using OSGeo.GDAL;
 using OSGeo.OSR;
 
-namespace Landis.Extension.Succession.Landispro
+namespace Landis.Extension.Succession.Density
 {
     //*******************************************
     //in original map8.cpp, there is "=" operator overload, attention

@@ -10,7 +10,7 @@ using System.Collections;
 using Landis.Library.AgeOnlyCohorts;
 using Landis.SpatialModeling;
 
-namespace Landis.Extension.Succession.Landispro
+namespace Landis.Extension.Succession.Density
 {
     public class species: Landis.Library.AgeOnlyCohorts.ISiteCohorts
     {

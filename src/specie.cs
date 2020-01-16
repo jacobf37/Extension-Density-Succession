@@ -9,7 +9,7 @@ using Landis.Core;
 using System.Collections;
 using Landis.Library.AgeOnlyCohorts;
 
-namespace Landis.Extension.Succession.Landispro
+namespace Landis.Extension.Succession.Density
 {
     public class specie : agelist, Library.AgeOnlyCohorts.ISpeciesCohorts
     {

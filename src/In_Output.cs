@@ -14,7 +14,7 @@ using Landis.Utilities;
 //this file corresponds to IO.cpp in landis pro framewrok
 
 
-namespace Landis.Extension.Succession.Landispro
+namespace Landis.Extension.Succession.Density
 {
     public class In_Output
     {
@@ -88,7 +88,8 @@ namespace Landis.Extension.Succession.Landispro
 
             time_step = PlugIn.gl_sites.SuccessionTimeStep;
             pro0or401 = PlugIn.gl_sites.Pro0or401;
-            species_num = PlugIn.gl_sites.SpecNum;
+            //species_num = PlugIn.gl_sites.SpecNum;
+            species_num = PlugIn.gl_spe_Attrs.NumAttrs;
             output_dir = PlugIn.gl_param.OutputDir;
         }
 
@@ -1024,7 +1025,7 @@ namespace Landis.Extension.Succession.Landispro
                 pafScanline3 = new float[total_size];
                 pafScanline4 = new float[total_size];
                 pafScanline5 = new float[total_size];
-
+                pintScanline = new int[total_size];
 
                 if (Bio_flag != 0)
                 {
@@ -1789,7 +1790,7 @@ namespace Landis.Extension.Succession.Landispro
                 {
                     string gl_spe_attrs_i_name = PlugIn.gl_spe_Attrs[i].Name;
 
-                    Console.Write("creating {0} {1} {2} {3}\n", PlugIn.gl_sites.SpecNum, rep, gl_spe_attrs_i_name, "age map");
+                    //Console.Write("creating {0} {1} {2} {3}\n", PlugIn.gl_sites.SpecNum, rep, gl_spe_attrs_i_name, "age map");
 
                     reclass.speciesAgeMap(m, gl_spe_attrs_i_name);
 

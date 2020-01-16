@@ -6,7 +6,7 @@ using System.Text;
 using System.IO;
 using System.Runtime.InteropServices;
 
-namespace Landis.Extension.Succession.Landispro
+namespace Landis.Extension.Succession.Density
 {
     public static class system1
     {

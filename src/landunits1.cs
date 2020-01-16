@@ -8,7 +8,7 @@ using System.Text;
 using Landis.Utilities;
 
 
-namespace Landis.Extension.Succession.Landispro
+namespace Landis.Extension.Succession.Density
 {   
 
     public class landunits

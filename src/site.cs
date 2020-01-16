@@ -6,7 +6,7 @@ using System.Text;
 using System.IO;
 
 
-namespace Landis.Extension.Succession.Landispro
+namespace Landis.Extension.Succession.Density
 {
     public class site : species
     {

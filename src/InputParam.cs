@@ -7,7 +7,7 @@ using System.Text;
 using System.IO;
 //using Edu.Wisc.Forest.Flel.Util;
 
-namespace Landis.Extension.Succession.Landispro
+namespace Landis.Extension.Succession.Density
 {
     // NO_DISPERSAL      //No seed dispersal.
     // UNIFORM           //Uniform seed dispersal.

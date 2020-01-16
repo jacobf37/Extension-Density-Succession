@@ -8,7 +8,7 @@ using System.Diagnostics;
 using System.IO;
 
 
-namespace Landis.Extension.Succession.Landispro
+namespace Landis.Extension.Succession.Density
 {
     using SortedSITE = List<site>;
     public enum enum1 { TPA, BA, Bio, Car, IV, Seeds, RDensity, DBH };
@@ -952,7 +952,11 @@ namespace Landis.Extension.Succession.Landispro
 
                                     local_specie.setTreeNum(AgeIndexArray[i], SpecIndexArray[i], Math.Max(0, treesLeft));
 
-                                    //Console.WriteLine("Selfthinning set tree num = {0}", Math.Max(0, treesLeft));
+                                    //if (treesToremove > 0)
+                                    //{
+                                    //    Console.WriteLine("Remain - {0}, Initial - {1}", Math.Max(0, treesLeft), local_tree_num);
+                                    //}
+
 
                                     Area_tobeThin -= tempAreaInvolveTreeNum;
 
@@ -971,7 +975,10 @@ namespace Landis.Extension.Succession.Landispro
 
                                     local_specie.setTreeNum(AgeIndexArray[i], SpecIndexArray[i], Math.Max(0, treesLeft));
 
-                                    //Console.WriteLine("Selfthinning set tree num = {0}", Math.Max(0, treesLeft));
+                                    //if (treesLeft != local_tree_num)
+                                    //{
+                                    //    Console.WriteLine("Remain - {0}, Initial - {1}", Math.Max(0, treesLeft), local_tree_num);
+                                    //}
 
                                     Area_tobeThin -= tempAreaInvolveTreeNum;
 
@@ -1007,7 +1014,10 @@ namespace Landis.Extension.Succession.Landispro
 
                                 local_specie.setTreeNum(AgeIndexArray[i], SpecIndexArray[i], Math.Max(0, treesLeft));
 
-                                //Console.WriteLine("Selfthinning set tree num = {0}", Math.Max(0, treesLeft));
+                                //if (treesLeft != local_tree_num)
+                                //{
+                                //    Console.WriteLine("Remain - {0}, Initial - {1}", Math.Max(0, treesLeft), local_tree_num);
+                                //}
 
                                 Area_tobeThin -= tempAreaInvolveTreeNum;
 
@@ -1089,7 +1099,10 @@ namespace Landis.Extension.Succession.Landispro
 
                                     local_specie.setTreeNum(AgeIndexArray[i], SpecIndexArray[i], Math.Max(0, treesLeft));
 
-                                    //Console.WriteLine("Selfthinning set tree num = {0}", Math.Max(0, treesLeft));
+                                    //if (treesToremove > 0)
+                                    //{
+                                    //    Console.WriteLine("Remain - {0}, Initial - {1}", Math.Max(0, treesLeft), local_tree_num);
+                                    //}
 
                                     Area_tobeThin -= tempAreaInvolveTreeNum;
 
@@ -1109,7 +1122,10 @@ namespace Landis.Extension.Succession.Landispro
 
                                     local_specie.setTreeNum(AgeIndexArray[i], SpecIndexArray[i], Math.Max(0, treesLeft));
 
-                                    //Console.WriteLine("Selfthinning set tree num = {0}", Math.Max(0, treesLeft));
+                                    //if (treesLeft != local_tree_num)
+                                    //{
+                                    //    Console.WriteLine("Remain - {0}, Initial - {1}", Math.Max(0, treesLeft), local_tree_num);
+                                    //}
 
                                     Area_tobeThin -= tempAreaInvolveTreeNum;
 
@@ -1143,7 +1159,10 @@ namespace Landis.Extension.Succession.Landispro
 
                                     local_specie.setTreeNum(AgeIndexArray[i], SpecIndexArray[i], Math.Max(0, treesLeft));
 
-                                    //Console.WriteLine("Selfthinning set tree num = {0}", Math.Max(0, treesLeft));
+                                    //if (treesLeft != local_tree_num)
+                                    //{
+                                    //    Console.WriteLine("Remain - {0}, Initial - {1}", Math.Max(0, treesLeft), local_tree_num);
+                                    //}
 
                                     Area_tobeThin -= tempAreaInvolveTreeNum;
 
@@ -1229,7 +1248,10 @@ namespace Landis.Extension.Succession.Landispro
 
                                     local_specie.setTreeNum(AgeIndexArray[i], SpecIndexArray[i], Math.Max(0, treesLeft));
 
-                                    //Console.WriteLine("Selfthinning set tree num = {0}", Math.Max(0, treesLeft));
+                                    //if (treesToremove > 0)
+                                    //{
+                                    //    Console.WriteLine("Remain - {0}, Initial - {1}", Math.Max(0, treesLeft), local_tree_num);
+                                    //}
 
                                     Area_tobeThin -= tempAreaInvolveTreeNum;
 
@@ -1248,7 +1270,10 @@ namespace Landis.Extension.Succession.Landispro
 
                                     local_specie.setTreeNum(AgeIndexArray[i], SpecIndexArray[i], Math.Max(0, treesLeft));
 
-                                    //Console.WriteLine("Selfthinning set tree num = {0}", Math.Max(0, treesLeft));
+                                    //if (treesLeft != local_tree_num)
+                                    //{
+                                    //    Console.WriteLine("Remain - {0}, Initial - {1}", Math.Max(0, treesLeft), local_tree_num);
+                                    //}
 
                                     Area_tobeThin -= tempAreaInvolveTreeNum;
 
@@ -1283,7 +1308,10 @@ namespace Landis.Extension.Succession.Landispro
 
                                     local_specie.setTreeNum(AgeIndexArray[i], SpecIndexArray[i], Math.Max(0, treesLeft));
 
-                                    //Console.WriteLine("Selfthinning set tree num = {0}", Math.Max(0, treesLeft));
+                                    //if (treesLeft != local_tree_num)
+                                    //{
+                                    //    Console.WriteLine("Remain - {0}, Initial - {1}", Math.Max(0, treesLeft), local_tree_num);
+                                    //}
 
                                     Area_tobeThin -= tempAreaInvolveTreeNum;
 
@@ -1369,7 +1397,10 @@ namespace Landis.Extension.Succession.Landispro
 
                                     local_specie.setTreeNum(AgeIndexArray[i], SpecIndexArray[i], Math.Max(0, treesLeft));
 
-                                    //Console.WriteLine("Selfthinning set tree num = {0}", Math.Max(0, treesLeft));
+                                    //if (treesToremove > 0)
+                                    //{
+                                    //    Console.WriteLine("Remain - {0}, Initial - {1}", Math.Max(0, treesLeft), local_tree_num);
+                                    //}
 
                                     Area_tobeThin -= tempAreaInvolveTreeNum;
 
@@ -1387,8 +1418,11 @@ namespace Landis.Extension.Succession.Landispro
                                     int treesLeft = (int)float_treeleft;
 
                                     local_specie.setTreeNum(AgeIndexArray[i], SpecIndexArray[i], Math.Max(0, treesLeft));
-                                    
-                                    //Console.WriteLine("Selfthinning set tree num = {0}", Math.Max(0, treesLeft));
+
+                                    //if (treesLeft != local_tree_num)
+                                    //{
+                                    //    Console.WriteLine("Remain - {0}, Initial - {1}", Math.Max(0, treesLeft), local_tree_num);
+                                    //}
 
                                     Area_tobeThin -= tempAreaInvolveTreeNum;
 

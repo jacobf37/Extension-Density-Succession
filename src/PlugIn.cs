@@ -14,11 +14,11 @@ using Landis.Core;
 using Landis.SpatialModeling;
 
 
-namespace Landis.Extension.Succession.Landispro
+namespace Landis.Extension.Succession.Density
 {
     public class PlugIn : SuccessionMain
     {
-        public static readonly string ExtensionName = "Landis_pro Succession";
+        public static readonly string ExtensionName = "Density Succession";
 
 
         private static ICore modelCore;
@@ -135,7 +135,7 @@ namespace Landis.Extension.Succession.Landispro
             if (envOn > 0)
                 Console.Write("Environment will be updated every {0} iterarion\n", envOn);
             
-            Landispro.Timestep.timestep = (uint)gl_param.SuccessionTimestep;
+            Density.Timestep.timestep = (uint)gl_param.SuccessionTimestep;
 
             numbOfIter = gl_param.Num_Iteration;
 
@@ -300,8 +300,8 @@ namespace Landis.Extension.Succession.Landispro
 
                     //define land unit
                     landunit l = gl_sites.locateLanduPt(i, j);
-
-                    if (l != null && l.active())
+                    //if (l != null && l.active())
+                    if (l != null)
                     {
                         site local_site = gl_sites[i, j];
 
@@ -329,11 +329,9 @@ namespace Landis.Extension.Succession.Landispro
                 {
                     //Console.WriteLine("i = {0}, j = {1}", i, j);
                     landunit l = gl_sites.locateLanduPt(i, j);
-
                     KillTrees(i, j);
-                    if (itr == 90 && i == 193 && j == 156)
-                        Console.WriteLine("watch: {0}:{1}", "kill trees", gl_sites[193, 156].SpecieIndex(2).getAgeVector(1));
-                    if (l != null && l.active())
+                    //Jacob if (l != null && l.active())
+                    if (l != null)
                     {
                         float local_RD = gl_sites[i, j].RD;
 

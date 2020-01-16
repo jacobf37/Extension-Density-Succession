@@ -6,7 +6,7 @@ using System.Text;
 using System.IO;
 using System.Diagnostics;
 
-namespace Landis.Extension.Succession.Landispro
+namespace Landis.Extension.Succession.Density
 {
     public class landunit
     {

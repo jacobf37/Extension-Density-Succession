@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Landis.SpatialModeling;
 using Landis.Core;
 
-namespace Landis.Extension.Succession.Landispro
+namespace Landis.Extension.Succession.Density
 {
     class SiteVars
     {

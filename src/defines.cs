@@ -6,7 +6,7 @@ using System.Text;
 
 //corresponding to Defines.h in landis pro
 
-namespace Landis.Extension.Succession.Landispro
+namespace Landis.Extension.Succession.Density
 {
     public static class defines
     {

@@ -4,7 +4,7 @@ using Landis.Utilities;
 using Landis.Core;
 
 
-namespace Landis.Extension.Succession.Landispro
+namespace Landis.Extension.Succession.Density
 {
     /// <summary>
     /// the following parameters are required in landis pro succession
