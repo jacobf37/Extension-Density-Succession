@@ -22,6 +22,15 @@ bld/
 [Bb]in/
 [Oo]bj/
 
+
+# LANDIS outputs and parameter files
+[Pp]aram/[Oo]utputs
+[Pp]aram/[Mm]etadata
+Landis-log.txt
+*.vat.cpg
+*.vat.dbf
+output_CohortStats.txt
+
 # Visual Studio 2015 cache/options directory
 .vs/
 
@@ -66,6 +75,7 @@ artifacts/
 *.pidb
 *.svclog
 *.scc
+
 
 # Chutzpah Test files
 _Chutzpah*

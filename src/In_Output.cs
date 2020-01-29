@@ -1970,7 +1970,7 @@ namespace Landis.Extension.Succession.Density
         //This will read in all LANDIS global variables.
         //public static void getInput(int[] freq, string[] reMethods, string[] ageMap, pdp ppdp, int BDANo, double[] wAdfGeoTransform)
         //public static void getInput(int[] freq, string[] ageMap, pdp ppdp, int BDANo, double[] wAdfGeoTransform)
-        public static void getInput(int[] freq, string[] ageMap, pdp ppdp)
+        public static void getInput(int[] freq, pdp ppdp)
         {
             //BinaryReader ltMapFile = new BinaryReader(File.Open(succession.gl_param.landUnitMapFile, FileMode.Open)),
 
@@ -1983,7 +1983,6 @@ namespace Landis.Extension.Succession.Density
             
             string mapProj = simgFile.GetProjectionRef();
             
-            //this might be potentially problematic
             simgFile.GetGeoTransform(adfGeoTransform);
 
             for (int i = 0; i < 6; i++)
@@ -2022,33 +2021,10 @@ namespace Landis.Extension.Succession.Density
             
             ppdp.set_parameters(gDLLMode, PlugIn.gl_sites.numColumns, PlugIn.gl_sites.numRows);
 
-
-            //inputBin8(rcFile, siFile, nRows, nCols, b16or8); // need to change Qia Oct 06 2008
-            //inputImgSpec(rcFile, simgFile, (int)nRows, (int)nCols);
             inputImgSpec(PlugIn.gl_param.ReclassInFile, simgFile);
             simgFile.Dispose();
-            /*inputLandtypeMap8(ltMapFile, nCols, nRows, ppdp); // need to change Qia Oct 06 2008
-
-            while (!system1.LDeof(roFile))
-                succession.reMethods[reclassMethods++] = system1.read_string(roFile);
-
-            while (!system1.LDeof(ageFile))
-                succession.ageMaps[numAgeMaps++] = system1.read_string(ageFile);*/
-
-            //inputLandtypeImg(PlugIn.gl_param.LandImgMapFile, (int)nCols, (int)nRows, ppdp);
-            //inputLandtypeImg((int)nCols, (int)nRows, ppdp);
-
-            // if ((gDLLMode & defines.G_HARVEST) != 0)
-            // {
-            //     Console.Write("Enabling harvest\n");
-
-            //     HarvestPassInit(&sites, numberOfSpecies, parameters.outputDir, parameters.strHarvestInitName, ppdp);
-
-            //     Console.Write("Enabling harvest done\n");
-            // }
 
             var freqOfOutput = new StreamReader(PlugIn.gl_param.Freq_out_put);
-
 
             int c = 0;
 
@@ -2057,9 +2033,6 @@ namespace Landis.Extension.Succession.Density
                 string temp = system1.read_string(freqOfOutput);
 
                 freq[c] = int.Parse(temp);
-
-                //if ((freq[c] > succession.gl_sites.TimeStep) && (freq[c] % succession.gl_sites.TimeStep != 0))
-                //    throw new Exception("Illegal frequency value encountered."); //Nim: changed spelling
 
                 if (freq[c] > PlugIn.gl_param.Num_Iteration)
                     throw new Exception("frequency value cannot be larger than number of iterations");

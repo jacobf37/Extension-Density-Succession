@@ -185,7 +185,7 @@ namespace Landis.Extension.Succession.Density
 
             //In_Output.getInput(freq, ageMaps, pPDP, BDANo, wAdfGeoTransform);
             SiteVars.Initialize();
-            In_Output.getInput(freq, ageMaps, pPDP);
+            In_Output.getInput(freq, pPDP);
 
 #if !LANDISPRO_ONLY_SUCCESSION
             if ((gDLLMode & DEFINES.G_HARVEST) != 0)
@@ -227,9 +227,9 @@ namespace Landis.Extension.Succession.Density
             {
                 int local_num = reclYear / gl_sites.SuccessionTimeStep;
 
-                reclass3.reclassify(reclYear, ageMaps);
+                //Jacob reclass3.reclassify(reclYear, ageMaps);
 
-                In_Output.putOutput(local_num, local_num, freq);
+                //Jacob In_Output.putOutput(local_num, local_num, freq);
 
                 In_Output.putOutput_Landis70Pro(local_num, local_num, freq);
 
@@ -239,7 +239,7 @@ namespace Landis.Extension.Succession.Density
             }
             else
             {
-                In_Output.putOutput(0, 0, freq);
+                //Jacob In_Output.putOutput(0, 0, freq);
 
                 In_Output.putOutput_Landis70Pro(0, 0, freq);
 
@@ -291,8 +291,33 @@ namespace Landis.Extension.Succession.Density
         {
             gl_sites.GetMatureTree();
 
-            //increase ages
-            for (uint i = 1; i <= snr; ++i)
+            //Jacob ----- Test
+            foreach (Site site in modelCore.Landscape.ActiveSites)
+            {
+                uint tempRow = (uint)gl_sites.convertLP_Row(site.Location.Row);
+                uint tempCol = (uint)site.Location.Column;
+
+                string tempName = site.Location.ToString();
+                int mapCD = PlugIn.ModelCore.Ecoregion[site].MapCode;
+                string erName = PlugIn.ModelCore.Ecoregion[site].Name;
+
+                float local_RD = gl_sites[tempRow, tempCol].RD;
+
+                landunit l = PlugIn.gl_landUnits[PlugIn.ModelCore.Ecoregion[PlugIn.ModelCore.Landscape.GetSite(site.Location.Row, site.Location.Column)].Name];
+
+                site local_site = gl_sites[tempRow, tempCol];
+
+                for (int k = 1; k <= specAtNum; ++k)
+                {
+                    local_site.SpecieIndex(k).GrowTree();
+                }
+
+            }
+
+
+/*          Jacob ----- Old site iterator      
+ *                //increase ages
+                for (uint i = 1; i <= snr; ++i)
             {
                 for (uint j = 1; j <= snc; ++j)
                 {
@@ -314,53 +339,91 @@ namespace Landis.Extension.Succession.Density
 
                 }
                 //Console.ReadLine();
-            }
+            }*/
 
             //seed dispersal
             initiateRDofSite_Landis70();
             Console.WriteLine("Seed Dispersal:");
 
-
-            for (uint i = 1; i <= snr; ++i)
+            //Jacob ----- Test
+            foreach (Site site in modelCore.Landscape.ActiveSites)
             {
-                //Console.WriteLine("\n{0}%\n", 100 * i / snr);
+                uint tempRow = (uint)gl_sites.convertLP_Row(site.Location.Row);
+                uint tempCol = (uint)site.Location.Column;
 
-                for (uint j = 1; j <= snc; ++j)
+                string tempName = site.Location.ToString();
+                int mapCD = PlugIn.ModelCore.Ecoregion[site].MapCode;
+                string erName = PlugIn.ModelCore.Ecoregion[site].Name;
+
+                float local_RD = gl_sites[tempRow, tempCol].RD;
+
+                landunit l = PlugIn.gl_landUnits[PlugIn.ModelCore.Ecoregion[PlugIn.ModelCore.Landscape.GetSite(site.Location.Row, site.Location.Column)].Name];
+
+                if (local_RD < l.MaxRDArray(0))
+
+                    gl_sites.SiteDynamics(0, tempRow, tempCol);
+
+                else if (local_RD >= l.MaxRDArray(0) && local_RD < l.MaxRDArray(1))
+
+                    gl_sites.SiteDynamics(1, tempRow, tempCol);
+
+                else if (local_RD >= l.MaxRDArray(1) && local_RD <= l.MaxRDArray(2))
+
+                    gl_sites.SiteDynamics(2, tempRow, tempCol);
+
+                else if (local_RD > l.MaxRDArray(2) && local_RD <= l.MaxRDArray(3))
+
+                    gl_sites.SiteDynamics(3, tempRow, tempCol);
+
+                else
                 {
-                    //Console.WriteLine("i = {0}, j = {1}", i, j);
-                    landunit l = gl_sites.locateLanduPt(i, j);
-                    KillTrees(i, j);
-                    //Jacob if (l != null && l.active())
-                    if (l != null)
-                    {
-                        float local_RD = gl_sites[i, j].RD;
-
-                        if (local_RD < l.MaxRDArray(0))
-
-                            gl_sites.SiteDynamics(0, i, j);
-
-                        else if (local_RD >= l.MaxRDArray(0) && local_RD < l.MaxRDArray(1))
-
-                            gl_sites.SiteDynamics(1, i, j);
-
-                        else if (local_RD >= l.MaxRDArray(1) && local_RD <= l.MaxRDArray(2))
-
-                            gl_sites.SiteDynamics(2, i, j);
-
-                        else if (local_RD > l.MaxRDArray(2) && local_RD <= l.MaxRDArray(3))
-
-                            gl_sites.SiteDynamics(3, i, j);
-
-                        else
-                        {
-                            Debug.Assert(local_RD > l.MaxRDArray(3));
-                            gl_sites.SiteDynamics(4, i, j);
-                        }
-                    }
+                    Debug.Assert(local_RD > l.MaxRDArray(3));
+                    gl_sites.SiteDynamics(4, tempRow, tempCol);
                 }
-
             }
-            Console.WriteLine("end succession_Landis70 once");
+
+/*          Jacob ----- Old site iterator  
+             *            for (uint i = 1; i <= snr; ++i)
+                        {
+                            //Console.WriteLine("\n{0}%\n", 100 * i / snr);
+
+                            for (uint j = 1; j <= snc; ++j)
+                            {
+                                //Console.WriteLine("i = {0}, j = {1}", i, j);
+                                landunit l = gl_sites.locateLanduPt(i, j);
+                                KillTrees(i, j);
+                                if (l != null && l.active())
+                                //if (l != null)
+                                {
+                                    float local_RD = gl_sites[i, j].RD;
+
+                                    if (local_RD < l.MaxRDArray(0))
+
+                                        gl_sites.SiteDynamics(0, i, j);
+
+                                    else if (local_RD >= l.MaxRDArray(0) && local_RD < l.MaxRDArray(1))
+
+                                        gl_sites.SiteDynamics(1, i, j);
+
+                                    else if (local_RD >= l.MaxRDArray(1) && local_RD <= l.MaxRDArray(2))
+
+                                        gl_sites.SiteDynamics(2, i, j);
+
+                                    else if (local_RD > l.MaxRDArray(2) && local_RD <= l.MaxRDArray(3))
+
+                                        gl_sites.SiteDynamics(3, i, j);
+
+                                    else
+                                    {
+                                        Debug.Assert(local_RD > l.MaxRDArray(3));
+                                        gl_sites.SiteDynamics(4, i, j);
+                                    }
+                                }
+                            }
+
+                        }*/
+            
+            Console.WriteLine("End density succession");
         }
 
 
@@ -763,17 +826,19 @@ namespace Landis.Extension.Succession.Density
                     In_Output.putOutput_Landis70Pro(0, numbOfIter, frequency);
                 }
 
-                    
+                /* Jacob   
                 if (i % (gl_sites.SuccessionTimeStep * freq[4]) == 0 && i_d_timestep <= numbOfIter)
                 {
                     In_Output.putOutput(0, i_d_timestep, freq);
                 }
-
-                    
+                */
+                
+                /* Jacob
                 if (i == gl_sites.SuccessionTimeStep * numbOfIter)
                 {
                     In_Output.putOutput(0, numbOfIter, frequency);
                 }
+                */
 
                 In_Output.putOutput_AgeDistStat(i_d_timestep);
 

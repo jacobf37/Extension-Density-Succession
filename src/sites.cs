@@ -581,13 +581,18 @@ namespace Landis.Extension.Succession.Density
             //landispro and landis2 look at the map in different ways. landispro looks at the map from the lower left 
             //corner, while landis 2 does that from the upper left corner. therefore we need to make the following change:
             int landispro_i = (int)(rows - i + 1);
-
             if (PlugIn.ModelCore.Landscape[landispro_i, (int)j].DataIndex == 0)
                 return PlugIn.gl_landUnits["empty"];
             else
                 return PlugIn.gl_landUnits[PlugIn.ModelCore.Ecoregion[PlugIn.ModelCore.Landscape.GetSite(landispro_i, (int)j)].Name];
         }
 
+        public int convertLP_Row(int i)
+        {
+            //Convert LANDIS-II row coordinate to LANDIS PRO row coordinate 
+            //corner, while landis 2 does that from the upper left corner. therefore we need to make the following change:
+            return (int)(rows - i + 1);
+        }
 
 
         //When a site disappears, delete it
@@ -1988,7 +1993,7 @@ namespace Landis.Extension.Succession.Density
                                 Debug.Assert(double_val <= UINT_MAX && double_val > 0);
 
                                 local_specie.AvailableSeed += (uint)double_val;
-                                if(Row==20&&Col==2)Console.WriteLine("{0}:+{1}={2}", i_age, double_val, local_specie.AvailableSeed);
+                                
                             }
 
                         }
@@ -2005,7 +2010,7 @@ namespace Landis.Extension.Succession.Density
                         {
                             for (int j = (int)Col - maxD_d_cellsize; j <= Col + maxD_d_cellsize; j++)
                             {
-                                if (i >= 1 && i <= rows && j >= 1 && j <= columns && locateLanduPt((uint)i, (uint)j) != null && locateLanduPt((uint)i, (uint)j).active())
+                                if (i >= 1 && i <= rows && j >= 1 && j <= columns && locateLanduPt((uint)i, (uint)j) != null && locateLanduPt((uint)i, (uint)j).Active)
                                 {
                                     int TempDist = (int)Math.Max(Math.Abs(i - Row), Math.Abs(j - Col));
 
@@ -2021,7 +2026,7 @@ namespace Landis.Extension.Succession.Density
                                     Debug.Assert(double_val <= UINT_MAX && double_val >= 0);
 
                                     local_specie.AvailableSeed += (uint)double_val;
-                                    if (Row == 20 && Col == 2) Console.WriteLine("{0} {1}:+{2}={3}", i, j, double_val, local_specie.AvailableSeed);
+                                    
                                 }
 
                             }
@@ -2039,12 +2044,10 @@ namespace Landis.Extension.Succession.Density
 
                         double_val = local_specie.AvailableSeed * (0.95 + float_rand * 0.1);
 
-                        //Console.Write("{0:N6} ", float_rand);
-
                         Debug.Assert(double_val <= UINT_MAX && double_val >= 0);
 
                         local_specie.AvailableSeed = (uint)double_val;
-                        if (Row == 20 && Col == 2) Console.WriteLine("frand: {0}", double_val);
+                        
                     }
 
                 }//end else

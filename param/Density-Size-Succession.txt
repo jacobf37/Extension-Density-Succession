@@ -26,7 +26,7 @@ MortalityRate												  0  << 0 means using default value
 SpeciesHeight												  0  << 0 means using default value
 
 OutPutOptionFile    						   OutputOption.txt
-OutPutDirectory     									      1
+OutPutDirectory     							   /outputs/1
 FrequencyOutPutOptionFile 						   freq_out.put
 HarvestTimestep                                     10
 FireTimestep                                        10

@@ -42,6 +42,7 @@ namespace Landis.Extension.Succession.Density
 
         private land_status status;
 
+        private bool active;
         //=======================================================================================
 
         public int MinShade { get { return minShade; } set { minShade = value; } }        
@@ -78,6 +79,12 @@ namespace Landis.Extension.Succession.Density
             set { index = value; }
         }
 
+        public bool Active
+        {
+            get { return active; }
+            set { active = value; }
+
+        }
 
         public float get_probReproduction(int index)
         {
@@ -288,10 +295,11 @@ namespace Landis.Extension.Succession.Density
 
         //A landunit type is either active or inactive.
         //Inactive land units are not processed.
-        public bool active()
+/*      Jacob ---- Previous active check  
+ *        public bool active()
         {
             return status == land_status.ACTIVE;
-        }
+        }*/
 
 
         //Returns true if a land unit type is water, false otherwise.

@@ -218,7 +218,7 @@ namespace Landis.Extension.Succession.Density
 				{
 					for (uint j=1; j<=snc; j++)
 					{
-                        if (PlugIn.gl_sites.locateLanduPt(i, j).active())
+                        if (PlugIn.gl_sites.locateLanduPt(i, j).Active)
 
                             m[i, j] = (ushort)(reclassifySite(PlugIn.gl_sites[i, j], n));
 

@@ -85,7 +85,7 @@ namespace Landis.Extension.Succession.Density
             {
                 for (uint j = 1; j <= snc; j++)
                 {
-                    if (PlugIn.gl_sites.locateLanduPt(i, j).active())
+                    if (PlugIn.gl_sites.locateLanduPt(i, j).Active)
                     {
 
                         m[i, j] = 0;
@@ -166,7 +166,7 @@ namespace Landis.Extension.Succession.Density
             {
                 for (uint j = 1; j <= snc; j++)
                 {
-                    if (PlugIn.gl_sites.locateLanduPt(i, j).active())
+                    if (PlugIn.gl_sites.locateLanduPt(i, j).Active)
                     {
                         m[i, j] = 0;
 
@@ -253,7 +253,7 @@ namespace Landis.Extension.Succession.Density
                         throw new Exception("Invalid landunit error\n");
 
 
-                    if (PlugIn.gl_sites.locateLanduPt(i, j).active())
+                    if (PlugIn.gl_sites.locateLanduPt(i, j).Active)
                     {
                         m[i, j] = 0;       //where species not presents
 
