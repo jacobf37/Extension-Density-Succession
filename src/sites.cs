@@ -3140,7 +3140,7 @@ namespace Landis.Extension.Succession.Density
 
         public override string LandisDataValue
         {
-            get { return "growth rate by section"; }
+            get { return "LandtypeGrowthRate"; }
         }
 
         public GrowthRateParamParser(int GrowthFlag_in)

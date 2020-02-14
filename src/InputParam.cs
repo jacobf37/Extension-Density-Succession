@@ -125,7 +125,7 @@ namespace Landis.Extension.Succession.Density
     {
         public override string LandisDataValue
         {
-            get { return "Density-Size-Succession"; }
+            get { return "Density-Succession"; }
         }
 
 
@@ -144,7 +144,7 @@ namespace Landis.Extension.Succession.Density
             ReadVar(seedAlg);
             parameters.DispRegime = (int)(dispersal_type)Enum.Parse(typeof(dispersal_type), seedAlg.Value.Actual);
 
-            InputVar<string> initCommunities = new InputVar<string>("InitialCommunitiesWithAge");
+            InputVar<string> initCommunities = new InputVar<string>("InitialCommunities");
             ReadVar(initCommunities);
             parameters.ReclassInFile = initCommunities.Value.Actual;
 
@@ -153,7 +153,7 @@ namespace Landis.Extension.Succession.Density
             parameters.SiteImgFile = communitiesMap.Value.Actual;
 
 
-            InputVar<string> landUnitFile = new InputVar<string>("LandtypeAttributesFile");
+            InputVar<string> landUnitFile = new InputVar<string>("LandtypeParameters");
             ReadVar(landUnitFile);
             parameters.LandUnitFile = landUnitFile.Value.Actual;
 
@@ -184,11 +184,11 @@ namespace Landis.Extension.Succession.Density
             //parameters.ExtraDynFile = extraDynFile.Value;
 
 
-            InputVar<string> extraSpeciesFile = new InputVar<string>("ExtraSpeciesAttributeFile");
+            InputVar<string> extraSpeciesFile = new InputVar<string>("DensitySpeciesParameters");
             ReadVar(extraSpeciesFile);
             parameters.ExtraSpecAtrFile = extraSpeciesFile.Value.Actual;
 
-            InputVar<string> growthFlagFile = new InputVar<string>("SpeciesGrowthRatesbyLandtypeFile");
+            InputVar<string> growthFlagFile = new InputVar<string>("LandtypeGrowthRate");
             ReadVar(growthFlagFile);
             parameters.GrowthFlagFile = growthFlagFile.Value.Actual;
 

@@ -21,7 +21,7 @@ build/
 bld/
 [Bb]in/
 [Oo]bj/
-
+testparam/
 
 # LANDIS outputs and parameter files
 [Pp]aram/[Oo]utputs

@@ -68,7 +68,7 @@ namespace Landis.Extension.Succession.Density
     {
         public override string LandisDataValue
         {
-            get { return "ExtraSpeciesParameters"; }
+            get { return "DensitySpeciesParameters"; }
         }
 
         protected override List<extra_species_attr> Parse()

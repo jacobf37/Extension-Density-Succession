@@ -5,7 +5,7 @@ chestoak    Y Y Y N N N
 northredoak Y Y Y N N N
 blackoak    Y Y Y N N N
 scarletoak  Y Y Y N N N
-redmaple    Y Y Y N N N     
+redmaple    Y Y Y Y Y Y     
 sugarmaple  Y Y Y N N N            
 yellowpop   Y Y Y N N N    
 amerbeech   Y Y Y N N N      
@@ -21,7 +21,7 @@ pseudosp    Y Y Y N N N
            
            
    
-Total  Y Y Y Y N      
+Total  Y Y Y Y Y      
            
 N 
             

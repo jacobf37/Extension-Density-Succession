@@ -1,4 +1,4 @@
-LandisData	ExtraSpeciesParameters 
+LandisData	DensitySpeciesParameters 
 
 >> Name      RCLS     SpType1  SpType2   MAXDQ   MAXSDI Germination  
 >>           COEFF                                         Seeds    CarbonCoef

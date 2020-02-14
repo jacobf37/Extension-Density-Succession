@@ -631,7 +631,76 @@ namespace Landis.Extension.Succession.Density
 
 
 
+        public static void ageMapOutput(int itr)
+        {
+            DateTime a1 = DateTime.Now;
 
+            Driver poDriver = Gdal.GetDriverByName("HFA");
+            if (poDriver == null)
+                throw new Exception("Age map output GDAL driver error!");
+
+            string[] papszOptions = null;
+
+            int[] pintScanline = null;
+
+            int TmpTreeT = 0, TmpTreesS = 0;
+
+            Dataset ageMapDS = null;
+
+            Band ageMapBand = null;
+
+            int col_num = (int)PlugIn.gl_sites.numColumns;
+            int row_num = (int)PlugIn.gl_sites.numRows;
+            int integerND = -999;
+            Console.WriteLine("Age map output -- {0}, itr = {1}", a1, itr);
+
+            string output_dir_string = output_dir + "/";
+            string local_string = "_" + (itr * time_step).ToString() + ".img";
+
+            for (int k = 1; k <= species_num; k++)
+            {
+                string outName = Path.Combine(output_dir_string, PlugIn.gl_spe_Attrs[k].Name, local_string);
+                ageMapDS = poDriver.Create(outName, col_num, row_num, 1, DataType.GDT_Int16, papszOptions);
+                ageMapDS.SetProjection(mapCRS);
+                if (ageMapDS == null)
+                    throw new Exception("Error creating age output IMG file");
+
+                ageMapDS.SetGeoTransform(wAdfGeoTransform);
+
+                ageMapBand = ageMapDS.GetRasterBand(1);
+                ageMapBand.SetNoDataValue(integerND);
+
+                int m_max = PlugIn.gl_spe_Attrs[k].Longevity / time_step;
+                for (uint i = (uint)row_num; i > 0; --i)
+                {
+                    for (uint j = 1; j <= col_num; ++j)
+                    {
+                        if (!PlugIn.gl_sites.locateLanduPt(i, j).Active)
+                        {
+                            pintScanline[(row_num - i) * col_num + j - 1] = integerND;
+                        }
+                        else if (PlugIn.gl_sites.locateLanduPt(i, j).Active)
+                        {
+                            TmpTreesS = 0;
+
+                            specie local_specis = PlugIn.gl_sites[i, j].SpecieIndex(k);
+
+                            for (int m = 1; m <= m_max; m++)
+                            {
+                                TmpTreesS += (int)local_specis.getTreeNum(m, k);
+                            }
+                            pintScanline[(row_num - i) * col_num + j - 1] = TmpTreesS;
+                        }
+                    }
+                }
+
+                ageMapBand.WriteRaster(0, 0, col_num, row_num, pintScanline, col_num, row_num, 0, 0);
+
+
+                if (ageMapDS != null)
+                    ageMapDS.Dispose();
+            }
+        }
 
 
         public static void putOutput_Landis70Pro(int rep, int itr, int[] freq)
@@ -639,6 +708,10 @@ namespace Landis.Extension.Succession.Density
             DateTime a1 = DateTime.Now;
 
             double TmpBiomassT = 0, TmpBiomassS = 0, TmpBasalAreaT = 0, TmpBasalAreaS = 0, TmpCarbon = 0, TmpCarbonTotal = 0, TmpRDTotal;
+
+            float floatND = -999;
+
+            int integerND = 65535;
 
             int TmpTreeT = 0, TmpTreesS = 0;
 
@@ -713,7 +786,7 @@ namespace Landis.Extension.Succession.Density
                         poDstDS.SetGeoTransform(wAdfGeoTransform);
 
                         outPoBand = poDstDS.GetRasterBand(1);
-
+                        outPoBand.SetNoDataValue(floatND);
 
                         float biomass1 = PlugIn.gl_sites.GetBiomassData(PlugIn.gl_spe_Attrs[k].BioMassCoef, 1);
                         float biomass2 = PlugIn.gl_sites.GetBiomassData(PlugIn.gl_spe_Attrs[k].BioMassCoef, 2);
@@ -724,21 +797,28 @@ namespace Landis.Extension.Succession.Density
                             for (uint j = 1; j <= col_num; ++j)
                             {
                                 landunit l = PlugIn.gl_sites.locateLanduPt(i, j);
-                                TmpBiomassS = 0;
-
-                                specie local_specis = PlugIn.gl_sites[i, j].SpecieIndex(k);
-
-                                for (int m = 1; m <= m_max; m++)
+                                
+                                if (!l.Active)
                                 {
-                                    float local_grow_rate = PlugIn.gl_sites.GetGrowthRates(k, m, l.LtID);
-
-                                    if (local_grow_rate >= Biomass_threshold)
-                                        TmpBiomassS += Math.Exp(biomass1 + biomass2 * Math.Log(local_grow_rate)) * local_specis.getTreeNum(m, k) / 1000.00;
+                                    pafScanline[(row_num - i) * col_num + j - 1] = floatND;
                                 }
+                                else if (l.Active)
+                                {
+                                    TmpBiomassS = 0;
+
+                                    specie local_specis = PlugIn.gl_sites[i, j].SpecieIndex(k);
+
+                                    for (int m = 1; m <= m_max; m++)
+                                    {
+                                        float local_grow_rate = PlugIn.gl_sites.GetGrowthRates(k, m, l.LtID);
+
+                                        if (local_grow_rate >= Biomass_threshold)
+                                            TmpBiomassS += Math.Exp(biomass1 + biomass2 * Math.Log(local_grow_rate)) * local_specis.getTreeNum(m, k) / 1000.00;
+                                    }
 
 
-                                pafScanline[(row_num - i) * col_num + j - 1] = (float)TmpBiomassS;
-
+                                    pafScanline[(row_num - i) * col_num + j - 1] = (float)TmpBiomassS;
+                                }
                                 //if (itr > 29 && TmpBiomassS != 0)
                                 //    Console.Write("{0:F2} ", TmpBiomassS);
                             }
@@ -766,26 +846,32 @@ namespace Landis.Extension.Succession.Density
                         poDstDS.SetGeoTransform(wAdfGeoTransform);
 
                         outPoBand = poDstDS.GetRasterBand(1);
+                        outPoBand.SetNoDataValue(floatND);
 
                         for (uint i = (uint)row_num; i > 0; --i)
                         {
                             for (uint j = 1; j <= col_num; ++j)
                             {
                                 landunit l = PlugIn.gl_sites.locateLanduPt(i, j);
-
-                                TmpBasalAreaS = 0;
-
-                                specie local_specis = PlugIn.gl_sites[i, j].SpecieIndex(k);
-
-                                for (int m = 1; m <= m_max; m++)
+                                if (!l.Active)
                                 {
-                                    float local_grow_rate = PlugIn.gl_sites.GetGrowthRates(k, m, l.LtID);
-
-                                    TmpBasalAreaS += local_grow_rate * local_grow_rate * local_const * local_specis.getTreeNum(m, k);
+                                    pafScanline[(row_num - i) * col_num + j - 1] = floatND;
                                 }
+                                else if (l.Active)
+                                {
+                                    TmpBasalAreaS = 0;
 
-                                pafScanline[(row_num - i) * col_num + j - 1] = (float)TmpBasalAreaS;
+                                    specie local_specis = PlugIn.gl_sites[i, j].SpecieIndex(k);
 
+                                    for (int m = 1; m <= m_max; m++)
+                                    {
+                                        float local_grow_rate = PlugIn.gl_sites.GetGrowthRates(k, m, l.LtID);
+
+                                        TmpBasalAreaS += local_grow_rate * local_grow_rate * local_const * local_specis.getTreeNum(m, k);
+                                    }
+
+                                    pafScanline[(row_num - i) * col_num + j - 1] = (float)TmpBasalAreaS;
+                                }
                                 //if (itr > 29 && TmpBasalAreaS != 0)
                                 //    Console.Write("{0:F1} ", TmpBasalAreaS);
                             }
@@ -808,13 +894,13 @@ namespace Landis.Extension.Succession.Density
                     {
                         string fptree = output_dir_string + TreesFileNames[k - 1] + local_string;
 
-                        poDstDS = poDriver.Create(fptree, col_num, row_num, 1, OSGeo.GDAL.DataType.GDT_UInt32, papszOptions);//*
+                        poDstDS = poDriver.Create(fptree, col_num, row_num, 1, OSGeo.GDAL.DataType.GDT_UInt16, papszOptions);//*
                         poDstDS.SetProjection(mapCRS);
                         poDstDS.SetGeoTransform(wAdfGeoTransform);
 
                         outPoBand = poDstDS.GetRasterBand(1);
-
-
+                        outPoBand.SetNoDataValue(integerND);
+                        
                         if (poDstDS == null)
                             throw new Exception("Img file not be created.");
 
@@ -823,17 +909,24 @@ namespace Landis.Extension.Succession.Density
                         {
                             for (uint j = 1; j <= col_num; ++j)
                             {
-                                TmpTreesS = 0;
-
-                                specie local_specis = PlugIn.gl_sites[i, j].SpecieIndex(k);
-
-                                for (int m = 1; m <= m_max; m++)
+                                if (!PlugIn.gl_sites.locateLanduPt(i, j).Active)
                                 {
-                                    TmpTreesS += (int)local_specis.getTreeNum(m, k);
+                                    pintScanline[(row_num - i) * col_num + j - 1] = integerND;
                                 }
-                                //if (itr > 9 && TmpTreesS != 0)
-                                //    Console.Write("{0}\n", TmpTreesS);
-                                pintScanline[(row_num - i) * col_num + j - 1] = TmpTreesS;
+                                else if (PlugIn.gl_sites.locateLanduPt(i, j).Active)
+                                {
+                                    TmpTreesS = 0;
+
+                                    specie local_specis = PlugIn.gl_sites[i, j].SpecieIndex(k);
+
+                                    for (int m = 1; m <= m_max; m++)
+                                    {
+                                        TmpTreesS += (int)local_specis.getTreeNum(m, k);
+                                    }
+                                    //if (itr > 9 && TmpTreesS != 0)
+                                    //    Console.Write("{0}\n", TmpTreesS);
+                                    pintScanline[(row_num - i) * col_num + j - 1] = TmpTreesS;
+                                }
                             }
                         }
 
@@ -859,7 +952,7 @@ namespace Landis.Extension.Succession.Density
                         poDstDS.SetGeoTransform(wAdfGeoTransform);
 
                         outPoBand = poDstDS.GetRasterBand(1);
-
+                        outPoBand.SetNoDataValue(floatND);
 
                         for (uint i = (uint)row_num; i > 0; --i)
                         {
@@ -867,46 +960,53 @@ namespace Landis.Extension.Succession.Density
                             {
                                 landunit l = PlugIn.gl_sites.locateLanduPt(i, j);
 
-                                TmpBasalAreaT = 0;
-
-                                TmpTreeT = 0;
-
-                                for (int kk = 1; kk <= species_num; ++kk)
+                                if (!l.Active)
                                 {
-                                    if (PlugIn.gl_spe_Attrs[kk].SpType >= 0)
+                                    pafScanline[(row_num - i) * col_num + j - 1] = floatND;
+                                }
+                                else if (l.Active)
+                                {
+                                    TmpBasalAreaT = 0;
+
+                                    TmpTreeT = 0;
+
+                                    for (int kk = 1; kk <= species_num; ++kk)
                                     {
-                                        specie local_specis = PlugIn.gl_sites[i, j].SpecieIndex(kk);
-
-                                        int local_m_max = PlugIn.gl_spe_Attrs[kk].Longevity / time_step;
-
-                                        for (int m = 1; m <= local_m_max; m++)
+                                        if (PlugIn.gl_spe_Attrs[kk].SpType >= 0)
                                         {
-                                            float local_grow_rate = PlugIn.gl_sites.GetGrowthRates(kk, m, l.LtID);
+                                            specie local_specis = PlugIn.gl_sites[i, j].SpecieIndex(kk);
 
-                                            uint local_tree_num = local_specis.getTreeNum(m, kk);
+                                            int local_m_max = PlugIn.gl_spe_Attrs[kk].Longevity / time_step;
 
-                                            TmpBasalAreaT += local_grow_rate * local_grow_rate * local_const * local_tree_num;
+                                            for (int m = 1; m <= local_m_max; m++)
+                                            {
+                                                float local_grow_rate = PlugIn.gl_sites.GetGrowthRates(kk, m, l.LtID);
 
-                                            TmpTreeT += (int)local_tree_num;
+                                                uint local_tree_num = local_specis.getTreeNum(m, kk);
+
+                                                TmpBasalAreaT += local_grow_rate * local_grow_rate * local_const * local_tree_num;
+
+                                                TmpTreeT += (int)local_tree_num;
+                                            }
                                         }
                                     }
+
+                                    TmpBasalAreaS = 0;
+
+                                    specie local_spe = PlugIn.gl_sites[i, j].SpecieIndex(k);
+
+                                    for (int m = 1; m <= m_max; ++m)
+                                    {
+                                        float local_grow_rate = PlugIn.gl_sites.GetGrowthRates(k, m, l.LtID);
+
+                                        TmpBasalAreaS += local_grow_rate * local_grow_rate * local_const * local_spe.getTreeNum(m, k);
+                                    }
+
+                                    if (TmpTreeT == 0 || TmpBasalAreaT < 0.0001)
+                                        pafScanline[(row_num - i) * col_num + j - 1] = 0;
+                                    else
+                                        pafScanline[(row_num - i) * col_num + j - 1] = (float)(TmpTreesS / (double)TmpTreeT + TmpBasalAreaS / TmpBasalAreaT);
                                 }
-
-                                TmpBasalAreaS = 0;
-
-                                specie local_spe = PlugIn.gl_sites[i, j].SpecieIndex(k);
-
-                                for (int m = 1; m <= m_max; ++m)
-                                {
-                                    float local_grow_rate = PlugIn.gl_sites.GetGrowthRates(k, m, l.LtID);
-
-                                    TmpBasalAreaS += local_grow_rate * local_grow_rate * local_const * local_spe.getTreeNum(m, k);
-                                }
-
-                                if (TmpTreeT == 0 || TmpBasalAreaT < 0.0001)
-                                    pafScanline[(row_num - i) * col_num + j - 1] = 0;
-                                else
-                                    pafScanline[(row_num - i) * col_num + j - 1] = (float)(TmpTreesS / (double)TmpTreeT + TmpBasalAreaS / TmpBasalAreaT);
                             }
                         }
 
@@ -925,20 +1025,27 @@ namespace Landis.Extension.Succession.Density
                     {
                         string fpSeeds = output_dir_string + SeedsFileNames[k - 1] + local_string;//* change
 
-                        poDstDS = poDriver.Create(fpSeeds, col_num, row_num, 1, OSGeo.GDAL.DataType.GDT_UInt32, papszOptions);
+                        poDstDS = poDriver.Create(fpSeeds, col_num, row_num, 1, OSGeo.GDAL.DataType.GDT_UInt16, papszOptions);
                         poDstDS.SetProjection(mapCRS);
                         if (poDstDS == null)
                             throw new Exception("Img file not be created.");
 
                         outPoBand = poDstDS.GetRasterBand(1);
+                        outPoBand.SetNoDataValue(integerND);
 
                         poDstDS.SetGeoTransform(wAdfGeoTransform);
 
                         for (uint i = (uint)row_num; i > 0; --i)
                             for (uint j = 1; j <= col_num; ++j)
                             {
-                                pintScanline[(row_num - i) * col_num + j - 1] = (int)PlugIn.gl_sites[i, j].SpecieIndex(k).AvailableSeed;
-                                //Console.Write("{0} ", succession.gl_sites[i, j].SpecieIndex(k).AvailableSeed);
+                                if (!PlugIn.gl_sites.locateLanduPt(i, j).Active)
+                                {
+                                    pintScanline[(row_num - i) * col_num + j - 1] = integerND;
+                                }
+                                else if (PlugIn.gl_sites.locateLanduPt(i, j).Active)
+                                {
+                                    pintScanline[(row_num - i) * col_num + j - 1] = (int)PlugIn.gl_sites[i, j].SpecieIndex(k).AvailableSeed;
+                                }
                             }
 
 
@@ -965,7 +1072,7 @@ namespace Landis.Extension.Succession.Density
                             throw new Exception("Img file not be created.");
 
                         outPoBand = poDstDS.GetRasterBand(1);
-
+                        outPoBand.SetNoDataValue(floatND);
                         poDstDS.SetGeoTransform(wAdfGeoTransform);
 
                         for (uint i = (uint)row_num; i > 0; --i)
@@ -973,29 +1080,35 @@ namespace Landis.Extension.Succession.Density
                             for (uint j = 1; j <= col_num; ++j)
                             {
                                 landunit l = PlugIn.gl_sites.locateLanduPt(i, j);
-
-                                if (PlugIn.gl_sites[i, j].specAtt(k).SpType >= 0)
+                                if (!l.Active)
                                 {
-                                    float temp = 0.0f;
-
-                                    site local_site = PlugIn.gl_sites[i, j];
-
-                                    speciesattr local_speciesattr = local_site.specAtt(k);
-                                    specie local_species = local_site.SpecieIndex(k);
-
-                                    int loop_num = local_speciesattr.Longevity / time_step;
-
-                                    for (int jj = 1; jj <= loop_num; jj++)
-                                    {
-                                        temp += (float)Math.Pow((PlugIn.gl_sites.GetGrowthRates(k, jj, l.LtID) / 25.4), 1.605) * local_species.getTreeNum(jj, k);
-                                    }
-
-                                    temp *= local_speciesattr.MaxAreaOfSTDTree / cellsize_square;
-
-                                    pafScanline[(row_num - i) * col_num + j - 1] = temp;
+                                    pafScanline[(row_num - i) * col_num + j - 1] = floatND;
                                 }
-                                else
-                                    pafScanline[(row_num - i) * col_num + j - 1] = 0.0f;
+                                else if (l.Active)
+                                {
+                                    if (PlugIn.gl_sites[i, j].specAtt(k).SpType >= 0)
+                                    {
+                                        float temp = 0.0f;
+
+                                        site local_site = PlugIn.gl_sites[i, j];
+
+                                        speciesattr local_speciesattr = local_site.specAtt(k);
+                                        specie local_species = local_site.SpecieIndex(k);
+
+                                        int loop_num = local_speciesattr.Longevity / time_step;
+
+                                        for (int jj = 1; jj <= loop_num; jj++)
+                                        {
+                                            temp += (float)Math.Pow((PlugIn.gl_sites.GetGrowthRates(k, jj, l.LtID) / 25.4), 1.605) * local_species.getTreeNum(jj, k);
+                                        }
+
+                                        temp *= local_speciesattr.MaxAreaOfSTDTree / cellsize_square;
+
+                                        pafScanline[(row_num - i) * col_num + j - 1] = temp;
+                                    }
+                                    else
+                                        pafScanline[(row_num - i) * col_num + j - 1] = 0.0f;
+                                }
                             }
                         }
 
@@ -1848,7 +1961,10 @@ namespace Landis.Extension.Succession.Density
             float[] pafScanline = new float[xDim * yDim];
 
             poBand.ReadRaster(0, 0, xDim, yDim, pafScanline, xDim, yDim, 0, 0);
-
+            
+            double noDataValue;
+            int hasNoData;
+            poBand.GetNoDataValue(out noDataValue, out hasNoData);
 
             Console.WriteLine("reading age cohort in inputImgSpec2: input file is {0}", ReclassInFile);
 
@@ -1973,7 +2089,6 @@ namespace Landis.Extension.Succession.Density
         public static void getInput(int[] freq, pdp ppdp)
         {
             //BinaryReader ltMapFile = new BinaryReader(File.Open(succession.gl_param.landUnitMapFile, FileMode.Open)),
-
             Dataset simgFile;
             if ((simgFile = (Dataset)Gdal.Open(PlugIn.gl_param.SiteImgFile, Access.GA_ReadOnly)) == null)
                 throw new Exception("species img map input file not found.");

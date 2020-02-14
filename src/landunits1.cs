@@ -186,7 +186,7 @@ namespace Landis.Extension.Succession.Density
                 //land_Units[i] = new landunit();
                 land_Units[i].Name = PlugIn.ModelCore.Ecoregions[i].Name;
                 land_Units[i].Index = i;
-                land_Units[i].LtID = i + 1;
+                land_Units[i].LtID = i;
                 land_Units[i].MinShade = Land_type_Attributes.get_min_shade(i);
                 land_Units[i].ProbReproductionOriginalBackup = new float[land_Units[i].Species_Attrs.NumAttrs];
                 land_Units[i].Active = PlugIn.ModelCore.Ecoregions[i].Active;
@@ -476,7 +476,7 @@ namespace Landis.Extension.Succession.Density
     {
         public override string LandisDataValue
         {
-            get { return "Land type Attributes"; }
+            get { return "LandtypeParameters"; }
         }
 
         protected override Land_type_Attributes Parse()

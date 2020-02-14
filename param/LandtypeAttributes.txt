@@ -1,4 +1,4 @@
-		LandisData		"Land type Attributes"
+LandisData		"LandtypeParameters"
 
 
 
