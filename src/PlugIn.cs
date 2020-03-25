@@ -20,7 +20,7 @@ namespace Landis.Extension.Succession.Density
     {
         public static readonly string ExtensionName = "Density Succession";
 
-
+        private static ISiteVar<SiteCohorts> sitecohorts;
         private static ICore modelCore;
 
         //public static int gl_currentDecade;
@@ -310,6 +310,13 @@ namespace Landis.Extension.Succession.Density
                 for (int k = 1; k <= specAtNum; ++k)
                 {
                     local_site.SpecieIndex(k).GrowTree();
+                }
+
+                //BRM
+                foreach (Landis.Library.BiomassCohorts.ISpeciesCohorts speciesCohorts in SiteVars.Cohorts[site])
+                {
+                    foreach (Landis.Library.BiomassCohorts.Cohort cohort in speciesCohorts)
+                        cohort.IncrementAge();
                 }
 
             }

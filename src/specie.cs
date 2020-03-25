@@ -232,7 +232,7 @@ namespace Landis.Extension.Succession.Density
             agevector = v;
         }
 
-        private class MyCohort : Landis.Library.Cohorts.ICohort
+        private class MyCohort : Landis.Library.Cohorts.ICohort, Landis.Library.AgeOnlyCohorts.ICohort
         {
             private int number, age;
             private ISpecies spe;
@@ -249,6 +249,13 @@ namespace Landis.Extension.Succession.Density
                 get
                 {
                     return spe;
+                }
+            }
+            public ushort Age
+            {
+                get
+                {
+                    return (ushort)age;
                 }
             }
         }

@@ -10,16 +10,43 @@ namespace Landis.Extension.Succession.Density
 {
     class SiteVars
     {
-        private static ISiteVar<Landis.Library.AgeOnlyCohorts.ISiteCohorts> cohorts;
+        private static ISiteVar<Landis.Library.AgeOnlyCohorts.ISiteCohorts> ageCohorts;
+        private static ISiteVar<Landis.Library.BiomassCohorts.ISiteCohorts> cohorts; //BRM
 
         public static void Initialize()
         {
-            cohorts = PlugIn.ModelCore.Landscape.NewSiteVar<Landis.Library.AgeOnlyCohorts.ISiteCohorts>();
-            //PlugIn.ModelCore.RegisterSiteVar(cohorts, "Succession.Cohorts");
-            PlugIn.ModelCore.RegisterSiteVar(cohorts, "Succession.AgeCohorts");
+            ageCohorts = PlugIn.ModelCore.Landscape.NewSiteVar<Landis.Library.AgeOnlyCohorts.ISiteCohorts>();
+            cohorts = PlugIn.ModelCore.Landscape.NewSiteVar<Landis.Library.BiomassCohorts.ISiteCohorts>();
+            PlugIn.ModelCore.RegisterSiteVar(ageCohorts, "Succession.AgeCohorts");
+            PlugIn.ModelCore.RegisterSiteVar(cohorts, "Succession.BiomassCohorts");
+
+            foreach (ActiveSite site in PlugIn.ModelCore.Landscape)
+            {
+                cohorts[site] = sitecohorts[site];
+
+                if (sitecohorts[site] != null && cohorts[site] == null)
+                {
+                    throw new System.Exception("Cannot convert cohorts to biomass site cohorts");
+                }
+                ageCohorts[site] = cohorts[site];
+
+            }
+
+
         }
 
-        public static ISiteVar<Landis.Library.AgeOnlyCohorts.ISiteCohorts> Cohorts
+        public static ISiteVar<Landis.Library.AgeOnlyCohorts.ISiteCohorts> AgeCohorts
+        {
+            get
+            {
+                return ageCohorts;
+            }
+            set
+            {
+                ageCohorts = value;
+            }
+        }
+        public static ISiteVar<Landis.Library.BiomassCohorts.ISiteCohorts> Cohorts
         {
             get
             {

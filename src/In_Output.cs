@@ -2056,7 +2056,26 @@ namespace Landis.Extension.Succession.Density
                         {
                             PlugIn.gl_sites[i, j] = new site();
                             PlugIn.gl_sites[i, j].copy(s[coverType]);
-                            SiteVars.Cohorts[PlugIn.ModelCore.Landscape.GetSite((int)i, (int)j)] = s[coverType];
+                            //BRM
+                            Library.BiomassCohorts.SiteCohorts siteCohorts = new Library.BiomassCohorts.SiteCohorts();
+                            site local_site = PlugIn.gl_sites[i, j];
+                            specie t = local_site.first();
+                            while (t != null)
+                            {
+                                for (uint p = 0; p < t.Length; p++)
+                                {
+                                    uint treeNum = t.getAgeVector((int)p);
+                                    if (treeNum > 0)
+                                    {
+                                        siteCohorts.AddNewCohort(t.Species, (ushort)((p+1) * time_step), 0);
+                                        //siteCohorts.AddNewCohort(t.Species);
+                                    }
+                                }
+                                t = local_site.next();
+                            }
+                            //SiteVars.Cohorts[PlugIn.ModelCore.Landscape.GetSite((int)i, (int)j)] = s[coverType];
+                            SiteVars.Cohorts[PlugIn.ModelCore.Landscape.GetSite((int)i, (int)j)] = siteCohorts;
+                            //BRM
                         }
 
                     }

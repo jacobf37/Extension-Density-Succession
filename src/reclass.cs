@@ -98,6 +98,7 @@ namespace Landis.Extension.Succession.Density
 
                         while (s != null)
                         {
+                         
                             uint temp = s.oldest();
 
                             if (temp > myage)

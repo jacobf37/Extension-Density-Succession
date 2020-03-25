@@ -18,7 +18,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <OutputPath>C:\Users\jacobfraser\source\repos\Core-Model-v7\Tool-Console\src\bin\extensions\</OutputPath>
+    <OutputPath>C:\BRM\LANDIS\GitCode\brmiranda\Core-Model-v7\Tool-Console\src\bin\extensions\</OutputPath>
   </PropertyGroup>
 
   <ItemGroup>
@@ -49,16 +49,13 @@
       <HintPath>..\..\Support-Library-Dlls-v7\Landis.Library.Biomass-v2.dll</HintPath>
     </Reference>
     <Reference Include="Landis.Library.BiomassCohorts-v3">
-      <HintPath>..\..\Support-Library-Dlls-v7\Landis.Library.BiomassCohorts-v3.dll</HintPath>
+      <HintPath>..\..\brmiranda\Core-Model-v7\Tool-Console\src\bin\extensions\Landis.Library.BiomassCohorts-v3.dll</HintPath>
     </Reference>
     <Reference Include="Landis.Library.Climate-v4">
       <HintPath>..\..\Support-Library-Dlls-v7\Landis.Library.Climate-v4.dll</HintPath>
     </Reference>
     <Reference Include="Landis.Library.Cohorts-v2">
       <HintPath>..\..\Support-Library-Dlls-v7\Landis.Library.Cohorts-v2.dll</HintPath>
-    </Reference>
-    <Reference Include="Landis.Library.InitialCommunity-v1">
-      <HintPath>..\..\Support-Library-Dlls-v7\Landis.Library.InitialCommunity-v1.dll</HintPath>
     </Reference>
     <Reference Include="Landis.Library.InitialCommunity-vInputBiomass">
       <HintPath>..\..\Support-Library-Dlls-v7\Landis.Library.InitialCommunity-vInputBiomass.dll</HintPath>

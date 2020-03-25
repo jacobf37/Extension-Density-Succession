@@ -390,7 +390,16 @@ namespace Landis.Extension.Succession.Density
         {
             foreach (var i in all_species)
                 for (int j = 0; j < years; ++j)
+                {
                     i.GrowTree();
+                }
+            //BRM
+            foreach (Landis.Library.BiomassCohorts.ISpeciesCohorts speciesCohorts in SiteVars.Cohorts[site])
+            {
+                foreach (Landis.Library.BiomassCohorts.Cohort cohort in speciesCohorts)
+                    cohort.IncrementAge();
+            }
+
         }
 
         IEnumerator<ISpeciesCohorts> IEnumerable<ISpeciesCohorts>.GetEnumerator()

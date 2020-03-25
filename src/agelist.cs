@@ -139,10 +139,18 @@ namespace Landis.Extension.Succession.Density
 
         public void GrowTree()
         {
-            for (uint i = agevector[0]; i > 1; i--)
+            //BRM - this doesnt seem correct
+            /*for (uint i = agevector[0]; i > 1; i--)
                 agevector[i] = agevector[i - 1];
 
             agevector[1] = 0;
+            */
+
+            //BRM - test
+            for (uint i = (uint)(agevector.Length-1); i > 0; i--)
+                agevector[i] = agevector[i - 1];
+
+            agevector[0] = 0;
         }
 
 
