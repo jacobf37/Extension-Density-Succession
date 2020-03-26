@@ -1,0 +1,10 @@
+LandisData   Extension
+
+Name         "Density Succession"
+Version      "1.0"
+Type         succession
+Assembly     Landis.Extension.Succession.Density-v1
+
+Class        Landis.Extension.Succession.Density.PlugIn
+Description  "Density Succession"
+CoreVersion  7.0

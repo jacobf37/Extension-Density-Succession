@@ -13,7 +13,7 @@ CellLength  270 << meters, 100 x 100 m = 1 ha
 
 >> Succession Extension     Initialization File
 >> --------------------     -------------------
-   "Density Succession"    Density-Size-Succession.txt
+   "Density Succession"    Density-Succession.txt
 
 
 >> Disturbance Extensions   Initialization File

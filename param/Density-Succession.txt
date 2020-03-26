@@ -1,0 +1,30 @@
+LandisData  "Density-Succession"
+
+Timestep  					10
+
+InitialCommunities        	InitialCommunities.txt
+InitialCommunitiesMap   	EastSppComp.img
+
+LandtypeParameters			LandtypeAttributes.txt
+Environment_change 	 		0 << 0:false, otherwise: true
+DynamicInputFile	 		Dynamic-Input.txt
+
+
+DensitySpeciesParameters	DensitySpeciesAttributes.txt
+LandtypeGrowthRate  		GrowthRateBySection.txt
+
+
+BiomassVariableFile			BioMassCoef.txt
+DensityRandomSeed			90
+MortalityRate				0  << 0 means using default value
+SpeciesHeight				0  << 0 means using default value
+
+OutPutOptionFile    		OutputOption.txt
+OutPutDirectory     		./outputs/1
+FrequencyOutPutOptionFile 	freq_out.put
+HarvestTimestep             10
+FireTimestep                10
+StockingX                   -0.00507
+StockingY                   0.01698
+StockingZ                   0.00317
+

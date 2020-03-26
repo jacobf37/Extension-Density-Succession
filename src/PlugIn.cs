@@ -49,7 +49,6 @@ namespace Landis.Extension.Succession.Density
 
         private static int numbOfIter;
 
-
         public static InputParameters   gl_param     = new InputParameters();
         public static speciesattrs gl_spe_Attrs = new speciesattrs(defines.MAX_SPECIES);
         public static landunits    gl_landUnits = new landunits(defines.MAX_LANDUNITS);
@@ -630,10 +629,6 @@ namespace Landis.Extension.Succession.Density
 
             //Simulation loops////////////////////////////////////////////////
 
-            //for (int i = 1; i <= numbOfIter * gl_sites.TimeStep; i++)
-            //{
-
-
             if (i % gl_sites.SuccessionTimeStep == 0)
             {
                 if (gl_param.FlagforSECFile == 3)
@@ -644,63 +639,13 @@ namespace Landis.Extension.Succession.Density
                     {
                         SEC_landtypefiles.Clear();
                         SEC_gisfiles.Clear();
-                        /*
-                        using (StreamReader FpSECfile = new StreamReader(gl_param.VarianceSECFile))
-                        {
-                            int num_of_files = system1.read_int(FpSECfile);
-
-                            for (int ii_count_num = 0; ii_count_num < num_of_files; ii_count_num++)
-                            {
-                                string SECfileMapGIS   = system1.read_string(FpSECfile);
-                                string SECfileNametemp = system1.read_string(FpSECfile);
-
-                                SEC_landtypefiles.Add(SECfileNametemp);
-                                SEC_gisfiles.Add(SECfileMapGIS);
-                            }
-                        }
-                                      */                  
 
                         if (index < gl_land_attrs.year_arr.Count)
                         {
-                            /*string SECfileNametemp = SEC_landtypefiles[index];
-
-                            string SECfileMapGIS = SEC_gisfiles[index];
-
-                            gl_param.LandUnitFile = SECfileNametemp;
-
-                            gl_landUnits.read(gl_param.LandUnitFile);
-                            */
                             Console.Write("\nEnvironment parameter Updated.\n");
                             string SECfileMapGIS = gl_land_attrs.Get_new_landtype_map(index);
-                            //strcpy(parameters.landUnitMapFile, SECfileMapGIS);
 
                             gl_param.LandImgMapFile = SECfileMapGIS;
-
-                            /*Dataset simgFile = null;
-
-                            if ((simgFile = (Dataset)Gdal.Open(gl_param.LandImgMapFile, Access.GA_ReadOnly)) == null) //* landtype.img
-                            {
-                                Console.Write("Land Map Img file %s not found.\n", gl_param.LandImgMapFile);
-
-                                throw new Exception(gl_param.LandImgMapFile);
-                            }
-                            else
-                            {
-                                double[] adfGeoTransform = new double[6];
-
-                                simgFile.GetGeoTransform(adfGeoTransform);
-                                { 
-                                    for (int ii = 0; ii < 6; ii++)
-                                    {
-                                        wAdfGeoTransform[ii] = adfGeoTransform[ii];
-                                    }
-                                }
-
-                                updateLandtypeImg8(simgFile);
-
-                                simgFile = null;
-                            }
-                            */
 
                             Console.WriteLine("\nEnvironment map Updated.");
 
@@ -736,45 +681,8 @@ namespace Landis.Extension.Succession.Density
                     {
                         if (index < SEC_landtypefiles.Count)
                         {
-                            /*gl_param.LandUnitFile = SEC_landtypefiles[index];
-                            //gl_param.landUnitMapFile =      SEC_gisfiles[index];
-                            gl_param.LandImgMapFile = SEC_gisfiles[index];
-
-                            gl_landUnits.read(gl_param.LandUnitFile);
-                            */
                             gl_param.LandImgMapFile = gl_land_attrs.Get_new_landtype_map(index);
                             Console.WriteLine("\nEnvironment parameter Updated.");
-
-
-                            /*using(BinaryReader GISmap = new BinaryReader(File.Open(gl_param.landUnitMapFile, FileMode.Open)))
-                            {
-                                updateLandtypeMap8(GISmap);
-                            }*/
-                            /*Dataset ltimgFile = null;
-
-                            if ((ltimgFile = (Dataset)Gdal.Open(gl_param.LandImgMapFile, Access.GA_ReadOnly)) == null) //* landtype.img
-                            {
-                                Console.WriteLine("Land Map Img file {0} not found.", gl_param.LandImgMapFile);
-
-                                throw new Exception(gl_param.LandImgMapFile);
-                            }
-                            else
-                            {
-                                double[] adfGeoTransform = new double[6];
-
-                                ltimgFile.GetGeoTransform(adfGeoTransform);
-                                {
-                                    for (int ii = 0; ii < 6; ii++)
-                                    {
-                                        wAdfGeoTransform[ii] = adfGeoTransform[ii];
-                                    }
-                                }
-
-                                updateLandtypeImg8(ltimgFile);
-
-                                ltimgFile = null;
-
-                            }*/
 
                             Console.WriteLine("\nEnvironment map Updated.");
 
@@ -825,20 +733,6 @@ namespace Landis.Extension.Succession.Density
                 {
                     In_Output.putOutput_Landis70Pro(0, numbOfIter, frequency);
                 }
-
-                /* Jacob   
-                if (i % (gl_sites.SuccessionTimeStep * freq[4]) == 0 && i_d_timestep <= numbOfIter)
-                {
-                    In_Output.putOutput(0, i_d_timestep, freq);
-                }
-                */
-                
-                /* Jacob
-                if (i == gl_sites.SuccessionTimeStep * numbOfIter)
-                {
-                    In_Output.putOutput(0, numbOfIter, frequency);
-                }
-                */
 
                 In_Output.putOutput_AgeDistStat(i_d_timestep);
 

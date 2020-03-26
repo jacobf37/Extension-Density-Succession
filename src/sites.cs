@@ -2869,32 +2869,6 @@ namespace Landis.Extension.Succession.Density
             else
 
             {   
-                //Read data from file
-                //StreamReader fp = new StreamReader(new FileStream(fileGrowthRates, FileMode.Open));
-
-                //int numLU = 0;
-
-                //while (!system1.LDeof(fp))
-                //{
-                //    for (int i = 1; i <= specNum; i++)
-                //    {
-                //        int local_time_loop = sitetmp.specAtt(i).Longevity / timeStep;
-
-                //        for (int j = 1; j <= local_time_loop; j++)
-                //        {
-                //            float temp = system1.read_float(fp);
-
-                //            SetGrowthRates(GrowthFlag, i, j, temp, numLU);
-                //        }
-                //    }
-
-                //    numLU++;
-                //}
-
-                //fp.Close();
-
-
-
                 GrowthRateParamParser growthrate_parser = new GrowthRateParamParser(GrowthFlag);
                 Landis.Data.Load<GrowthRateParam>(fileGrowthRates, growthrate_parser);
 
@@ -3084,7 +3058,7 @@ namespace Landis.Extension.Succession.Density
     {
         public override string LandisDataValue
         {
-            get { return "BiomassCoeffients"; }
+            get { return "BiomassCoefficients"; }
         }
 
         //read biomass coefficients from a file into matrix, (float) BioMassData(int ID,2). No Return Value

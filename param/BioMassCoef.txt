@@ -1,4 +1,4 @@
-LandisData		BiomassCoeffients
+LandisData		BiomassCoefficients
 
 >> species classification used to calculate Biomass
 

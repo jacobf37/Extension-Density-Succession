@@ -140,9 +140,9 @@ namespace Landis.Extension.Succession.Density
             ReadVar(timestep);
             parameters.SuccessionTimestep = timestep.Value.Actual;
 
-            InputVar<string> seedAlg = new InputVar<string>("SeedingAlgorithm");
-            ReadVar(seedAlg);
-            parameters.DispRegime = (int)(dispersal_type)Enum.Parse(typeof(dispersal_type), seedAlg.Value.Actual);
+//            InputVar<string> seedAlg = new InputVar<string>("SeedingAlgorithm");
+//            ReadVar(seedAlg);
+//            parameters.DispRegime = (int)(dispersal_type)Enum.Parse(typeof(dispersal_type), seedAlg.Value.Actual);
 
             InputVar<string> initCommunities = new InputVar<string>("InitialCommunities");
             ReadVar(initCommunities);
@@ -192,9 +192,9 @@ namespace Landis.Extension.Succession.Density
             ReadVar(growthFlagFile);
             parameters.GrowthFlagFile = growthFlagFile.Value.Actual;
 
-            //if (growthFlagFile.Value == "N/A" || growthFlagFile.Value == "0")
-            //    parameters.GrowthFlag = 0;
-            //else
+            if (growthFlagFile.Value == "N/A" || growthFlagFile.Value == "0")
+                parameters.GrowthFlag = 0;
+            else
             parameters.GrowthFlag = 1;//accoring to dr. wang wenjuan, there must be a file for growth rate
 
 
@@ -203,7 +203,7 @@ namespace Landis.Extension.Succession.Density
             ReadVar(biomassFile);
             parameters.Biomassfile = biomassFile.Value.Actual;
 
-            InputVar<int> randSeed = new InputVar<int>("RandomSeedForLandisPro");
+            InputVar<int> randSeed = new InputVar<int>("DensityRandomSeed");
             ReadVar(randSeed);
             parameters.RandSeed = randSeed.Value.Actual;
 
