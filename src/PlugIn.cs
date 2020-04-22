@@ -35,7 +35,8 @@ namespace Landis.Extension.Succession.Density
         private static List<string> SEC_gisfiles = new List<string>();
 
         //change by YYF 2018/11
-        public static int[] freq = new int[6];
+        //public static int[] freq = new int[6];
+        public static int[] freq = new int[6] { 1, 1, 1, 1, 1, 1 };
         public static uint numSpecies;
         public static uint snr, snc;
         public static pdp pPDP = new pdp();

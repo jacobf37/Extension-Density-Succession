@@ -210,24 +210,24 @@ namespace Landis.Extension.Succession.Density
 
 
 
-            InputVar<string> mortalityFile = new InputVar<string>("MortalityRate");
-            ReadVar(mortalityFile);
-            parameters.MortalityFile = mortalityFile.Value.Actual;
+            //InputVar<string> mortalityFile = new InputVar<string>("MortalityRate");
+            //ReadVar(mortalityFile);
+            //parameters.MortalityFile = mortalityFile.Value.Actual;
 
-            if (mortalityFile.Value.Actual == "N/A" || mortalityFile.Value.Actual == "0")
+            //if (mortalityFile.Value.Actual == "N/A" || mortalityFile.Value.Actual == "0")
                 parameters.MortalityFlag = 0;
-            else
-                parameters.MortalityFlag = 1;
+            //else
+                //parameters.MortalityFlag = 1;
 
 
-            InputVar<string> volumeFile = new InputVar<string>("SpeciesHeight");
-            ReadVar(volumeFile);
-            parameters.VolumeFile = volumeFile.Value.Actual;
+            //InputVar<string> volumeFile = new InputVar<string>("SpeciesHeight");
+            //ReadVar(volumeFile);
+            //parameters.VolumeFile = volumeFile.Value.Actual;
 
-            if (volumeFile.Value.Actual == "N/A" || volumeFile.Value.Actual == "0")
+            //if (volumeFile.Value.Actual == "N/A" || volumeFile.Value.Actual == "0")
                 parameters.VolumeFlag = 0;
-            else
-                parameters.VolumeFlag = 1;
+            //else
+                //parameters.VolumeFlag = 1;
 
 
 
@@ -240,9 +240,9 @@ namespace Landis.Extension.Succession.Density
             ReadVar(outputDir);
             parameters.OutputDir = outputDir.Value.Actual;
 
-            InputVar<string> freq_out_put = new InputVar<string>("FrequencyOutPutOptionFile");
+/*            InputVar<string> freq_out_put = new InputVar<string>("FrequencyOutPutOptionFile");
             ReadVar(freq_out_put);
-            parameters.Freq_out_put = freq_out_put.Value.Actual;
+            parameters.Freq_out_put = freq_out_put.Value.Actual;*/
 
             //Add by YYF 2018/11
             InputVar<int> timeStepHarvest = new InputVar<int>("HarvestTimestep");

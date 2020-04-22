@@ -3542,7 +3542,7 @@ namespace Landis.Extension.Succession.Density
 
             ///////////////////////
 
-            ReadValue(temp, currentLine);
+/*            ReadValue(temp, currentLine);
 
             if (temp.Value.Actual != "N/A")
             {
@@ -3553,7 +3553,7 @@ namespace Landis.Extension.Succession.Density
             else
             {
                 PlugIn.gl_sites.Flag_AgeDistStat = 0;
-            }           
+            } */          
 
 
             return null;

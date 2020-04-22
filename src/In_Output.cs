@@ -2139,7 +2139,7 @@ namespace Landis.Extension.Succession.Density
             inputImgSpec(PlugIn.gl_param.ReclassInFile, simgFile);
             simgFile.Dispose();
 
-            var freqOfOutput = new StreamReader(PlugIn.gl_param.Freq_out_put);
+/*            var freqOfOutput = new StreamReader(PlugIn.gl_param.Freq_out_put);
 
             int c = 0;
 
@@ -2194,7 +2194,7 @@ namespace Landis.Extension.Succession.Density
             Console.WriteLine();
 
             freqOfOutput.Close();
-
+*/
 
             //Set age colors to a spectrum.
             if ((gDLLMode & defines.G_WIND) != 0)
